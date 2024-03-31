@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.Manifest;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -48,8 +47,10 @@ public class HomePageActivity extends AppCompatActivity {
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private DatabaseReference postsRef;
-    //private Uri selectedImageUri;
+    private ProgressBar pb;
 
+
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +63,11 @@ public class HomePageActivity extends AppCompatActivity {
                 choosePicture();
             }
         });
+
+        // add progress bar for image upload
+        pb = findViewById(R.id.progressBar);
+        pb.setVisibility(View.INVISIBLE);
+
 
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
@@ -80,6 +86,7 @@ public class HomePageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 uploadPicture();
+                pb.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -170,6 +177,7 @@ public class HomePageActivity extends AppCompatActivity {
                                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void unused) {
+                                                    pb.setVisibility(View.INVISIBLE);
                                                     Toast.makeText(HomePageActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
                                                 }
                                             })
