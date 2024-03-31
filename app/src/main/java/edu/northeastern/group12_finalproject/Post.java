@@ -10,6 +10,22 @@ public class Post {
     private int active_minutes;
     private float distance;
 
-    // constructor, getters and setters
+    // constructor
+    // Constructor with imageUrl parameter
+    public Post(String postId, String username, long timestamp, String imageUrl, String description, int active_minutes, float distance) {
+        this.postId = postId;
+        this.username = username;
+        this.timestamp = timestamp;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.active_minutes = active_minutes;
+        this.distance = distance;
+    }
+
+    // getters and setters
+    // Setter method for imageUrl
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
 }
