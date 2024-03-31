@@ -40,7 +40,7 @@ import java.util.UUID;
 
 public class HomePageActivity extends AppCompatActivity {
 
-    //private static final int PERMISSION_REQUEST = 0;
+    private static final int PERMISSION_REQUEST = 0;
     //private static final int RESULT_LOAD_IMAGE = 1;
     private ImageView uploadedPic;
     private Uri imageUri;
@@ -69,6 +69,12 @@ public class HomePageActivity extends AppCompatActivity {
         // initialize Firebase app
         FirebaseApp.initializeApp(this);
 
+        // Request Permissions:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
+        }
+
         Button saveBtn = findViewById(R.id.saveButton);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,8 +96,48 @@ public class HomePageActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
             imageUri = data.getData();
-            uploadedPic.setImageURI(imageUri);
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                bitmap = rotateImageIfRequired(bitmap, imageUri);
+                uploadedPic.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            // uploadedPic.setImageURI(imageUri);
         }
+    }
+
+    // Handle chosen image being uploaded to ImageView sideways:
+    private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
+        InputStream input = getContentResolver().openInputStream(selectedImage);
+        ExifInterface exif = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (input != null) {
+                exif = new ExifInterface(input);
+            }
+        }
+        if (exif == null) {
+            return bitmap;
+        }
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        int rotationInDegrees = exifToDegrees(orientation);
+        if (rotationInDegrees == 0) {
+            return bitmap;
+        }
+        Matrix matrix = new Matrix();
+        matrix.postRotate(rotationInDegrees);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+    private static int exifToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            return 90;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+            return 180;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+            return 270;
+        }
+        return 0;
     }
 
     private void uploadPicture() {
@@ -148,6 +194,7 @@ public class HomePageActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     //    @Override
 //    protected void onCreate(Bundle savedInstanceState) {
