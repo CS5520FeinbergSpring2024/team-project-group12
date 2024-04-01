@@ -33,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -40,6 +41,8 @@ import java.util.UUID;
 public class HomePageActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST = 0;
+    private static final int PERMISSION_REQUEST_CAMERA = 2;
+    private static final int REQUEST_IMAGE_CAPTURE = 3;
     //private static final int RESULT_LOAD_IMAGE = 1;
     private ImageView uploadedPic;
     private Uri imageUri;
@@ -81,6 +84,14 @@ public class HomePageActivity extends AppCompatActivity {
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
         }
 
+        Button cameraBtn = findViewById(R.id.cameraBtn);
+        cameraBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startCameraIntent();
+            }
+        });
+
         Button saveBtn = findViewById(R.id.saveButton);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,16 +102,44 @@ public class HomePageActivity extends AppCompatActivity {
         });
     }
 
+    private void startCameraIntent() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                return;
+            }
+        }
+        // if camera permission is granted, start camera intent
+        dispatchTakePictureIntent();
+    }
+
+    // method to start camera intent
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } else {
+            Toast.makeText(this, "No camera app found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // Show message if permissions not granted
-    @SuppressLint("MissingSuperCall")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
+            case PERMISSION_REQUEST_CAMERA:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dispatchTakePictureIntent();
+                } else {
+                    Toast.makeText(this, "Camera permission not granted", Toast.LENGTH_SHORT).show();
+                }
+                break;
             case PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "Permission not granted", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
                 }
                 break;
         }
