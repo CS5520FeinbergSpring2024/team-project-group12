@@ -284,3 +284,9 @@ public class HomePageActivity extends AppCompatActivity {
         }
     }
 }
+
+/**
+ * Note: if you open the app, upload a photo from the gallery and click save, it is saved to storage and to the database as a post correctly.
+ * If you THEN (after uploading and saving) capture a photo with the camera and click save, it saves it as a Post correctly, but then saves the old (uploaded, not captured) photo to storage with the same id.
+ * If you FIRST try to capture a picture (upon launching the app), and try to save, it does not recognize an image as having been loaded and does not work.
+ */
