@@ -155,18 +155,45 @@ public class HomePageActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            imageUri = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                bitmap = rotateImageIfRequired(bitmap, imageUri);
-                uploadedPic.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
+                // Camera intent result
+                Bundle extras = data.getExtras();
+                if (extras != null && extras.containsKey("data")) {
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    if (imageBitmap != null) {
+                        // set captured image to ImageView
+                        uploadedPic.setImageBitmap(imageBitmap);
+                    }
+                }
+            } else if (requestCode == 1 && data != null && data.getData() != null) {
+                imageUri = data.getData();
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                    bitmap = rotateImageIfRequired(bitmap, imageUri);
+                    uploadedPic.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            // uploadedPic.setImageURI(imageUri);
         }
     }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
+//            imageUri = data.getData();
+//            try {
+//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+//                bitmap = rotateImageIfRequired(bitmap, imageUri);
+//                uploadedPic.setImageBitmap(bitmap);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            // uploadedPic.setImageURI(imageUri);
+//        }
+//    }
 
     // Handle chosen image being uploaded to ImageView sideways:
     private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
