@@ -53,7 +53,6 @@ public class HomePageActivity extends AppCompatActivity {
     private ProgressBar pb;
 
 
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +62,14 @@ public class HomePageActivity extends AppCompatActivity {
         uploadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                choosePicture();
+                // Request Permissions to access phone's image gallery:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
+                } else {
+                    // else permission already granted, open gallery to choose picture
+                    choosePicture();
+                }
             }
         });
 
@@ -77,12 +83,6 @@ public class HomePageActivity extends AppCompatActivity {
 
         // initialize Firebase app
         FirebaseApp.initializeApp(this);
-
-        // Request Permissions:
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
-        }
 
         Button cameraBtn = findViewById(R.id.cameraBtn);
         cameraBtn.setOnClickListener(new View.OnClickListener() {
@@ -137,7 +137,7 @@ public class HomePageActivity extends AppCompatActivity {
                 break;
             case PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+                    choosePicture();
                 } else {
                     Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
                 }
@@ -178,22 +178,6 @@ public class HomePageActivity extends AppCompatActivity {
             }
         }
     }
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
-//            imageUri = data.getData();
-//            try {
-//                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-//                bitmap = rotateImageIfRequired(bitmap, imageUri);
-//                uploadedPic.setImageBitmap(bitmap);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            // uploadedPic.setImageURI(imageUri);
-//        }
-//    }
 
     // Handle chosen image being uploaded to ImageView sideways:
     private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
