@@ -18,26 +18,14 @@ public class HomePageActivity extends AppCompatActivity {
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showCreatePostDialog();
-                // createNewPost();
+                createNewPost();
             }
         });
-    }
-
-    private void showCreatePostDialog() {
-        CreatePostDialog dialog;
-        dialog = new CreatePostDialog(this, new CreatePostDialog.OnPostAddListener() {
-            @Override
-            public void onPostAdded(Post post) {
-                //
-            }
-        });
-        dialog.show();
     }
 
 
     private void createNewPost() {
-        Intent intent = new Intent(this, ImageUploadActivity.class);
+        Intent intent = new Intent(this, CreatePostActivity.class);
         startActivity(intent);
     }
 
