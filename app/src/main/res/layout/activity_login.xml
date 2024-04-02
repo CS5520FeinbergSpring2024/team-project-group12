@@ -20,7 +20,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center_horizontal"
-            android:padding="24dp">
+            android:padding="24dp"
+            android:background="@drawable/custom_et">
 
             <TextView
                 android:layout_width="match_parent"
@@ -28,7 +29,8 @@
                 android:text="Log in"
                 android:textSize="36sp"
                 android:textAlignment="center"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textColor="@color/pine"/>
 
             <EditText
                 android:layout_width="match_parent"
@@ -36,6 +38,7 @@
                 android:id="@+id/login_email"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="40dp"
+                android:drawableLeft="@drawable/baseline_email_24"
                 android:padding="8dp"
                 android:hint="Email"/>
 
@@ -45,6 +48,7 @@
                 android:id="@+id/login_password"
                 android:layout_marginRight="40dp"
                 android:layout_marginTop="20dp"
+                android:drawableLeft="@drawable/baseline_lock_24"
                 android:padding="8dp"
                 android:hint="Password"/>
 
@@ -55,6 +59,7 @@
                 android:id="@+id/login_button"
                 android:textSize="18sp"
                 android:layout_marginTop="30dp"
+                android:backgroundTint="@color/Pistachio"
                 app:cornerRadius = "20dp"/>
             <TextView
                 android:layout_width="wrap_content"
