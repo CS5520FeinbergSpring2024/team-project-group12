@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".SignUpActivity">
+    tools:context=".LoginActivity">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -52,7 +52,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:text="Log In"
-                android:id="@+id/login_button"/>
+                android:id="@+id/login_button"
+                android:textSize="18sp"
+                android:layout_marginTop="30dp"
+                app:cornerRadius = "20dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/signupRedirectText"
+                android:text="First-time user? Sign up"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:textSize="18sp"/>
+
 
         </LinearLayout>
 
