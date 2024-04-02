@@ -22,7 +22,7 @@ public class CreatePostActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_create_post);
+        setContentView(R.layout.activity_create_post);
 
         editTextDescription = findViewById(R.id.editTextDescription);
         buttonAddPost = findViewById(R.id.buttonAddPost);
