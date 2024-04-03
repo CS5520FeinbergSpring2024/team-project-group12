@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "806656968957",
+    "project_id": "final-project-sweatsquad",
+    "storage_bucket": "final-project-sweatsquad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806656968957:android:0c10083c9f2a69e8fad694",
+        "android_client_info": {
+          "package_name": "edu.northeastern.group12_finalproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5K2Wy63KXKfGEiz2DkJusQ1DdKV-PKKE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
