@@ -3,6 +3,7 @@ package edu.northeastern.group12_finalproject;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -48,6 +49,27 @@ public class CreatePostActivity extends AppCompatActivity {
                 selectImageForPost();
             }
         });
+
+        // get the ImageView from the layout
+        ImageView imageView = findViewById(R.id.postImageView);
+
+        // Retrieve the bitmap from the intent
+        // This works for CAPTURED images, not those uploaded from gallery. If uploaded from gallery, app crashes.
+        if (getIntent().hasExtra("uploaded_image")) {
+            Bitmap bitmap = getIntent().getParcelableExtra("uploaded_image");
+            if (bitmap != null) {
+                imageView.setImageBitmap(bitmap);
+            } else {
+                Toast.makeText(this, "Failed to retrieve image", Toast.LENGTH_SHORT).show();
+            }
+        } else if (getIntent().hasExtra("uploaded_image_uri")) {
+            // retrieve the image from the intent
+            String imageUriString = getIntent().getStringExtra("uploaded_image_uri");
+            Uri imageUri = Uri.parse(imageUriString);
+            imageView.setImageURI(imageUri);
+        } else {
+            Toast.makeText(this, "No image found", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void selectImageForPost() {

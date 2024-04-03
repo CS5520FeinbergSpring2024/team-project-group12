@@ -9,7 +9,10 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -34,6 +37,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -101,7 +106,68 @@ public class ImageUploadActivity extends AppCompatActivity {
                 pb.setVisibility(View.VISIBLE);
             }
         });
+
+        // add "Add to Post" button to take the uploaded image and set to ImageView on CreatePostActivity screen
+        Button addToPostBtn = findViewById(R.id.addToPost);
+        addToPostBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Check if the uploadedPic ImageView is not null and has a drawable (when captured via camera):
+                if (uploadedPic.getDrawable() != null) {
+                    Drawable drawable = uploadedPic.getDrawable();
+                    if (drawable instanceof BitmapDrawable) {
+                        // If the drawable is a bitmap, pass it directly
+                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                        Intent intent = new Intent(ImageUploadActivity.this, CreatePostActivity.class);
+                        intent.putExtra("uploaded_image", bitmap);
+                        startActivity(intent);
+                    } else {
+                        // If the drawable is not a bitmap (when image comes from gallery), extract the URI and pass it
+                        Uri imageUri = getImageUriFromDrawable(drawable);
+                        if (imageUri != null) {
+                            Intent intent = new Intent(ImageUploadActivity.this, CreatePostActivity.class);
+                            intent.putExtra("uploaded_image_uri", imageUri.toString());
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(ImageUploadActivity.this, "Failed to retrieve image URI", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    Toast.makeText(ImageUploadActivity.this, "No image found", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
+
+    private Uri getImageUriFromDrawable(Drawable drawable) {
+        Bitmap bitmap;
+
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            // If the drawable is not a bitmap drawable, create a new bitmap
+            int width = drawable.getIntrinsicWidth();
+            int height = drawable.getIntrinsicHeight();
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        }
+
+        // Save the bitmap to a temporary file and return its URI
+        try {
+            File tempFile = File.createTempFile("temp_image", ".png", getCacheDir());
+            FileOutputStream out = new FileOutputStream(tempFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+            return Uri.fromFile(tempFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     private void startCameraIntent() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -182,15 +248,6 @@ public class ImageUploadActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                // Pass the image URI back to CreatePostActivity
-                // NOTE: this is currently working only for images uploaded from gallery
-                // not images captured from the camera (stored as bitmap, not URI. Need to somehow
-                // turn bitmap into URI, or get the URI from the database before setResult.
-                Intent resultIntent = new Intent();
-                resultIntent.setData(imageUri);
-                setResult(RESULT_OK, resultIntent);
-                finish();
             }
         }
     }
