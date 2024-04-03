@@ -108,6 +108,12 @@ public class ImageUploadActivity extends AppCompatActivity {
         });
 
         // add "Add to Post" button to take the uploaded image and set to ImageView on CreatePostActivity screen
+        /**
+         * This method is to take the selected image and set it to the ImageView in the CreatePostActivity so that all the create post UI happens in one place.
+         * However, this is not working correctly, even though it worked correctly when the app was just uploading an image and saving it to the DB.
+         * So my suggestion would be to somehow try and put all CreatePost UI elements in this activity so that the "save" button still works as expected,
+         * and successfully adds the Post to the DB. But with real user-input data rather than the dummy data currently being used.
+         */
         Button addToPostBtn = findViewById(R.id.addToPost);
         addToPostBtn.setOnClickListener(new View.OnClickListener() {
             @Override
