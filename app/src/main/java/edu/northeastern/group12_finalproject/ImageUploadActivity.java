@@ -184,6 +184,9 @@ public class ImageUploadActivity extends AppCompatActivity {
                 }
 
                 // Pass the image URI back to CreatePostActivity
+                // NOTE: this is currently working only for images uploaded from gallery
+                // not images captured from the camera (stored as bitmap, not URI. Need to somehow
+                // turn bitmap into URI, or get the URI from the database before setResult.
                 Intent resultIntent = new Intent();
                 resultIntent.setData(imageUri);
                 setResult(RESULT_OK, resultIntent);
