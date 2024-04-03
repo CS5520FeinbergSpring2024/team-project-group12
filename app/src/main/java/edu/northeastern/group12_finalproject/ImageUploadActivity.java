@@ -182,6 +182,12 @@ public class ImageUploadActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+                // Pass the image URI back to CreatePostActivity
+                Intent resultIntent = new Intent();
+                resultIntent.setData(imageUri);
+                setResult(RESULT_OK, resultIntent);
+                finish();
             }
         }
     }

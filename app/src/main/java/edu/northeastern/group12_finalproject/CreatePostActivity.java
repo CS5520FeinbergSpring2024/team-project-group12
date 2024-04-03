@@ -3,13 +3,16 @@ package edu.northeastern.group12_finalproject;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class CreatePostActivity extends AppCompatActivity {
@@ -18,6 +21,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private Button buttonAddPost;
 
     private OnPostAddListener listener;
+    private static final int REQUEST_CODE_IMAGE_UPLOAD = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +51,22 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void selectImageForPost() {
-        Intent intent1 = new Intent(CreatePostActivity.this, ImageUploadActivity.class);
-        startActivity(intent1);
+        Intent intent = new Intent(CreatePostActivity.this, ImageUploadActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_IMAGE_UPLOAD);
+    }
+
+    // This method will be called when the ImageUploadActivity finishes
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_IMAGE_UPLOAD && resultCode == RESULT_OK && data != null) {
+            // get the imageURI from data intent
+            Uri imageUri = data.getData();
+
+            // now load the image into an ImageView
+            ImageView imageView = findViewById(R.id.postImageView);
+            imageView.setImageURI(imageUri);
+        }
     }
 
     private void showToast(String message) {
