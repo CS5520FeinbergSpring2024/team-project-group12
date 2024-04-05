@@ -24,7 +24,7 @@
         <!--    Middle Section-->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/relLayout1"
             android:id="@+id/relLayout2"
             android:background="@drawable/pistachio_border_bottom">
@@ -42,11 +42,13 @@
                     android:layout_weight="25"
                     android:layout_marginStart="25dp">
 
+                    <!-- Profile photo -->
                     <ImageView
                         android:layout_width="80dp"
                         android:layout_height="80dp"/>
                 </RelativeLayout>
 
+                <!-- Followers information -->
                 <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -58,6 +60,35 @@
 
                 </RelativeLayout>
 
+            </LinearLayout>
+
+            <!-- User name and description -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_below="@+id/linLayout"
+                android:padding="20dp">
+
+                <!-- User display name-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/display_name"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:text="Test Android"
+                    android:textSize="16sp"/>
+
+                <!--Bio description-->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bio"
+                    android:textColor="@color/black"
+                    android:text="My bio"
+                    android:textSize="16sp"
+                    android:layout_marginTop="5dp"/>
             </LinearLayout>
         </RelativeLayout>
     </RelativeLayout>
