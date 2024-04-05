@@ -1,7 +1,5 @@
 package edu.northeastern.group12_finalproject;
 
-import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -21,9 +19,15 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class CreatePostActivity extends AppCompatActivity {
 
+    private EditText duration;
+    private EditText distance;
+    private EditText location;
+    private EditText editTextTitle;
     private EditText editTextDescription;
-    private Button buttonAddPost;
 
+    private Button buttonAddImage;
+    private Button buttonTakePhoto;
+    private Button post;
     private OnPostAddListener listener;
     private static final int REQUEST_CODE_IMAGE_UPLOAD = 101;
 
@@ -48,22 +52,21 @@ public class CreatePostActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        editTextDescription = findViewById(R.id.editTextDescription);
-        buttonAddPost = findViewById(R.id.buttonAddPost);
-        buttonAddPost.setOnClickListener(new View.OnClickListener() {
+        duration = findViewById(R.id.duration_edit_text);
+        distance = findViewById(R.id.distance_edit_text);
+        editTextTitle = findViewById(R.id.post_title_edit_text);
+        editTextDescription = findViewById(R.id.description_edit_text);
+        location = findViewById(R.id.location_edit_text);
+        buttonAddImage = findViewById(R.id.upload_photo_button);
+        buttonTakePhoto = findViewById(R.id.take_photo_button);
+        post = findViewById(R.id.post_button);
+        buttonAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String description = editTextDescription.getText().toString();
-
-                // Show snackbar with user-entered description
-                showToast("Your description is: " + description);
-                finish(); // Close the activity
+                selectImageForPost();
             }
         });
-
-        Button buttonAddImage = findViewById(R.id.addImageButton);
-        buttonAddImage.setOnClickListener(new View.OnClickListener() {
+        buttonTakePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectImageForPost();

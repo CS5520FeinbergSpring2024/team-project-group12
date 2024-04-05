@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="activity_types">
+        <item>Run</item>
+        <item>Walk</item>
+        <item>Hike</item>
+        <item>Bike</item>
+        <item>Rest Day</item>
+    </array>
+</resources>
