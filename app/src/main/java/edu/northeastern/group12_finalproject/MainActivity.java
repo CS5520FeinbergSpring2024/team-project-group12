@@ -19,12 +19,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-//        Button homeBtn = findViewById(R.id.bottom_nav_home);
-//        homeBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) { openHomePage(); }
-//        });
-
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
