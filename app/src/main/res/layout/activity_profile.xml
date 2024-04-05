@@ -6,26 +6,36 @@
     android:layout_height="match_parent"
     tools:context=".ProfileActivity">
 
-    <!-- Include the Top Navigation Bar layout -->
-    <include layout="@layout/snippet_top_profilebar"
-        android:id="@+id/top_navigation_bar"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent" />
-    <include layout="@layout/profile_follow_info"
-        />
+        android:layout_height="match_parent">
+        <!-- Include the Top Navigation Bar layout -->
+        <include layout="@layout/layout_profile_section" />
+
+        <ProgressBar
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:id="@+id/profileProgressBar"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100dp"/>
+
+    </RelativeLayout>
+
+
+
+
 
     <!-- Your profile content goes here -->
     <!-- Example: TextView to display profile information -->
-    <TextView
-        android:id="@+id/profile_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Profile Information"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+<!--    <TextView-->
+<!--        android:id="@+id/profile_info"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Profile Information"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <!-- Include the Bottom Navigation Bar layout -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
