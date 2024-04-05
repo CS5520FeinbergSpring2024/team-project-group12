@@ -56,7 +56,6 @@ public class CreatePostActivity extends AppCompatActivity {
         editTextTitle = findViewById(R.id.post_title_edit_text);
         editTextDescription = findViewById(R.id.description_edit_text);
         location = findViewById(R.id.location_edit_text);
-        buttonAddImage = findViewById(R.id.upload_photo_button);
         post = findViewById(R.id.post_button);
         buttonAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
