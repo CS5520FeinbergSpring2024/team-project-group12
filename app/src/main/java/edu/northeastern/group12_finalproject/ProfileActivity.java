@@ -1,13 +1,20 @@
 package edu.northeastern.group12_finalproject;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.nfc.Tag;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -37,6 +44,33 @@ public class ProfileActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        setupToolBar();
+
+    }
+    // set up top tool bar
+    private void setupToolBar() {
+        androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) findViewById(R.id.profileToolBar);
+        setSupportActionBar(toolbar);
+
+        toolbar.setOnMenuItemClickListener(new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Log.d(TAG, "onMenuItemClick: clicked menu item: " + item);
+                int id = item.getItemId();
+                if (id == R.id.profileMenu) {
+                    Log.d(TAG, "onMenuItemClick: Navigating to Profile Preferences. ");
+                }
+                return false;
+            }
+        });
+    }
+    // Override oncreateoptionmenu for top tool bar.
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.profile_menu, menu);
+        return true;
     }
 
     // method to open up home page activity

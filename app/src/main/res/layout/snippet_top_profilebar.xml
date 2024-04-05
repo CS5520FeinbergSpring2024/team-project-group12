@@ -3,9 +3,9 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@drawable/pistachio_border_bottom">
+        android:background="@color/Pistachio">
         
-        <Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/profileToolBar">
@@ -24,6 +24,6 @@
                     android:id="@+id/profileName"/>
 
             </RelativeLayout>
-        </Toolbar>
+        </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 </merge>
