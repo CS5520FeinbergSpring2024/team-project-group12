@@ -6,6 +6,7 @@ public class Post {
     private String username;
     private long timestamp;
     private String imageUrl;
+    private String postTitle;
     private String description;
     private int active_minutes;
     private float distance;
@@ -15,11 +16,12 @@ public class Post {
 
     }
     // Constructor with imageUrl parameter
-    public Post(String postId, String username, long timestamp, String imageUrl, String description, int active_minutes, float distance) {
+    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
         this.postId = postId;
         this.username = username;
         this.timestamp = timestamp;
         this.imageUrl = imageUrl;
+        this.postTitle = postTitle;
         this.description = description;
         this.active_minutes = active_minutes;
         this.distance = distance;
@@ -48,6 +50,10 @@ public class Post {
     // Setter method for imageUrl
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getPostTitle() {
+        return postTitle;
     }
 
     public String getDescription() {
