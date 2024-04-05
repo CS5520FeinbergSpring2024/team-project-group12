@@ -311,7 +311,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                                     public void onSuccess(Uri uri) {
                                         String imageUrl = uri.toString();
                                         // create new Post object with image
-                                        Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "description", 0, 0.0f);
+                                        Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl,"title", "description", 0, 0.0f);
 
                                         // get reference to Realtime DB
                                         appDB = FirebaseDatabase.getInstance();
@@ -368,7 +368,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                             public void onSuccess(Uri uri) {
                                 String imageUrl = uri.toString();
                                 // create new Post object with image
-                                Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "description", 0, 0.0f);
+                                Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "title","description", 0, 0.0f);
 
                                 // get reference to Realtime DB
                                 appDB = FirebaseDatabase.getInstance();
