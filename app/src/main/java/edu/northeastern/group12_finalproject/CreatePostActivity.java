@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class CreatePostActivity extends AppCompatActivity {
 
@@ -28,6 +31,24 @@ public class CreatePostActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.bottom_nav_home) {
+                    openHomePage();
+                    return true;
+                } else if (item.getItemId() == R.id.bottom_nav_new_post) {
+                    openNewPostPage();
+                    return true;
+                } else if (item.getItemId() == R.id.bottom_nav_profile) {
+                    openProfilePage();
+                    return true;
+                }
+                return false;
+            }
+        });
 
         editTextDescription = findViewById(R.id.editTextDescription);
         buttonAddPost = findViewById(R.id.buttonAddPost);
@@ -97,5 +118,22 @@ public class CreatePostActivity extends AppCompatActivity {
 
     public interface OnPostAddListener {
         void onPostAdded(Post post);
+    }
+
+    private void openHomePage() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
+
+    // Method to open New Post Activity
+    private void openNewPostPage() {
+        Intent intent = new Intent(this, CreatePostActivity.class);
+        startActivity(intent);
+    }
+
+    // Method to open Profile Activity
+    private void openProfilePage() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        startActivity(intent);
     }
 }
