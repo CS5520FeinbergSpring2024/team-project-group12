@@ -14,16 +14,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class ProfileActivity extends AppCompatActivity {
-
+    private ProgressBar progBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        // Progress bar
+        progBar = (ProgressBar) findViewById(R.id.profileProgressBar);
+        progBar.setVisibility(View.GONE);
 
         // set up of bottom nav bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
