@@ -33,18 +33,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.bottom_nav_home) {
-                    openHomePage();
-                    return true;
+                    openHomePage(); // working to implement a refresh
                 } else if (item.getItemId() == R.id.bottom_nav_new_post) {
                     openNewPostPage();
-                    return true;
                 } else if (item.getItemId() == R.id.bottom_nav_profile) {
                     openProfilePage();
-                    return true;
                 }
                 return false;
             }
@@ -52,22 +50,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    // method to open up home page activity
+    // finished current activity to remove from backstack
     private void openHomePage() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
-    // Method to open New Post Activity
+    // method to open up new post page activity
+    // finished current activity to remove from backstack
     private void openNewPostPage() {
         Intent intent = new Intent(this, CreatePostActivity.class);
         startActivity(intent);
+        finish();
     }
 
-    // Method to open Profile Activity
+    // method to open up profile page activity
+    // finished current activity to remove from backstack
     private void openProfilePage() {
         Intent intent = new Intent(this, ProfileActivity.class);
         startActivity(intent);
+        finish();
     }
 
     // Method to create dummy posts

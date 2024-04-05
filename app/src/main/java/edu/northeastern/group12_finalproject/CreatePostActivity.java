@@ -33,18 +33,17 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_post);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_new_post);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.bottom_nav_home) {
                     openHomePage();
-                    return true;
                 } else if (item.getItemId() == R.id.bottom_nav_new_post) {
-                    openNewPostPage();
-                    return true;
+                    // do nothing, stay on page
                 } else if (item.getItemId() == R.id.bottom_nav_profile) {
                     openProfilePage();
-                    return true;
+
                 }
                 return false;
             }
@@ -120,20 +119,20 @@ public class CreatePostActivity extends AppCompatActivity {
         void onPostAdded(Post post);
     }
 
+    // method to open up home page activity
+    // finished current activity to remove from backstack
     private void openHomePage() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
-    // Method to open New Post Activity
-    private void openNewPostPage() {
-        Intent intent = new Intent(this, CreatePostActivity.class);
-        startActivity(intent);
-    }
 
-    // Method to open Profile Activity
+    // method to open up profile page activity
+    // finished current activity to remove from backstack
     private void openProfilePage() {
         Intent intent = new Intent(this, ProfileActivity.class);
         startActivity(intent);
+        finish();
     }
 }

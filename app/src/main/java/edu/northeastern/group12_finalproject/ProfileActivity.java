@@ -18,30 +18,37 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        // set up of bottom nav bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        // ensures profile button is highlighted
+        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_profile);
+
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            // if/else for using bottom nav bar
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 if (item.getItemId() == R.id.bottom_nav_home) {
                     openHomePage();
-                    return true;
                 } else if (item.getItemId() == R.id.bottom_nav_new_post) {
                     openNewPostPage();
-                    return true;
                 } else if (item.getItemId() == R.id.bottom_nav_profile) {
-                    return true;
+                    // do nothing, stay on page
                 }
                 return false;
             }
         });
     }
 
+    // method to open up home page activity
+    // finished current activity to remove from backstack
     private void openHomePage() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish(); // Close current activity
     }
 
+    // method to open up new post page activity
+    // finished current activity to remove from backstack
     private void openNewPostPage() {
         Intent intent = new Intent(this, CreatePostActivity.class);
         startActivity(intent);
