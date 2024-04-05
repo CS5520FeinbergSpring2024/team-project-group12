@@ -1,0 +1,43 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <!--Top toolbar-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/relLayout1">
+
+        <include layout="@layout/snippet_top_profilebar"
+            android:id="@+id/top_navigation_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent" />
+        </RelativeLayout>
+
+        <!--    Middle Section-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/relLayout1"
+            android:id="@+id/relLayout2"
+            android:background="@drawable/pistachio_border_bottom">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/linLayout"
+                android:weightSum="100">
+
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+</merge>
+
