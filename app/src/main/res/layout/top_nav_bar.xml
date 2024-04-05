@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/Pistachio"
+    android:padding="8dp">
+
+    <!-- Notification Button (Top Left) -->
+    <ImageButton
+        android:id="@+id/notification_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:src="@drawable/baseline_notifications_24"
+        android:background="@null" />
+
+    <!-- App Name (Centered) -->
+    <TextView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="monospace"
+        android:text="SweatSquad"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <!-- Search Button (Top Right) -->
+    <ImageButton
+        android:id="@+id/search_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/baseline_search_24"
+        android:background="@null" />
+
+</RelativeLayout>
