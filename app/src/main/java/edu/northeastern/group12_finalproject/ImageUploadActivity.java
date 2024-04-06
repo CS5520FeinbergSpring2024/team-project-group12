@@ -65,25 +65,10 @@ public class ImageUploadActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_upload);
         uploadedPic = findViewById(R.id.imageView);
-        // Button uploadBtn = findViewById(R.id.upload); // move this functionality to CreatePostActivity!
-//        uploadBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                // Request Permissions to access phone's image gallery:
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-//                        != PackageManager.PERMISSION_GRANTED) {
-//                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
-//                } else {
-//                    // else permission already granted, open gallery to choose picture
-//                    choosePicture();
-//                }
-//            }
-//        });
 
         // add progress bar for image upload
         pb = findViewById(R.id.progressBar);
         pb.setVisibility(View.INVISIBLE);
-
 
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
@@ -99,12 +84,9 @@ public class ImageUploadActivity extends AppCompatActivity {
             }
         });
 
-        // add "Add to Post" button to take the uploaded image and set to ImageView on CreatePostActivity screen
         /**
-         * This method is to take the selected image and set it to the ImageView in the CreatePostActivity so that all the create post UI happens in one place.
-         * However, this is not working correctly, even though it worked correctly when the app was just uploading an image and saving it to the DB.
-         * So my suggestion would be to somehow try and put all CreatePost UI elements in this activity so that the "save" button still works as expected,
-         * and successfully adds the Post to the DB. But with real user-input data rather than the dummy data currently being used.
+         * This method takes the image captured from the camera and sets it into the ImageView in the
+         * CreatePostActivity to be shown with other Post input values
          */
         Button addToPostBtn = findViewById(R.id.addToPost);
         addToPostBtn.setOnClickListener(new View.OnClickListener() {
@@ -119,16 +101,6 @@ public class ImageUploadActivity extends AppCompatActivity {
                         Intent intent = new Intent(ImageUploadActivity.this, CreatePostActivity.class);
                         intent.putExtra("uploaded_image", bitmap);
                         startActivity(intent);
-                    } else {
-                        // If the drawable is not a bitmap (when image comes from gallery), extract the URI and pass it
-                        Uri imageUri = getImageUriFromDrawable(drawable);
-                        if (imageUri != null) {
-                            Intent intent = new Intent(ImageUploadActivity.this, CreatePostActivity.class);
-                            intent.putExtra("uploaded_image_uri", imageUri.toString());
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(ImageUploadActivity.this, "Failed to retrieve image URI", Toast.LENGTH_SHORT).show();
-                        }
                     }
                 } else {
                     Toast.makeText(ImageUploadActivity.this, "No image found", Toast.LENGTH_SHORT).show();
@@ -136,36 +108,6 @@ public class ImageUploadActivity extends AppCompatActivity {
             }
         });
     }
-
-    private Uri getImageUriFromDrawable(Drawable drawable) {
-        Bitmap bitmap;
-
-        if (drawable instanceof BitmapDrawable) {
-            bitmap = ((BitmapDrawable) drawable).getBitmap();
-        } else {
-            // If the drawable is not a bitmap drawable, create a new bitmap
-            int width = drawable.getIntrinsicWidth();
-            int height = drawable.getIntrinsicHeight();
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-            drawable.draw(canvas);
-        }
-
-        // Save the bitmap to a temporary file and return its URI
-        try {
-            File tempFile = File.createTempFile("temp_image", ".png", getCacheDir());
-            FileOutputStream out = new FileOutputStream(tempFile);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-            return Uri.fromFile(tempFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
 
     private void startCameraIntent() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -212,14 +154,6 @@ public class ImageUploadActivity extends AppCompatActivity {
         }
     }
 
-//    // Method to select picture from device's gallery
-//    private void choosePicture() {
-//        Intent intent = new Intent();
-//        intent.setType("image/*");
-//        intent.setAction(Intent.ACTION_GET_CONTENT);
-//        startActivityForResult(intent, 1);
-//    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -251,38 +185,10 @@ public class ImageUploadActivity extends AppCompatActivity {
         }
     }
 
-//    // Handle chosen image being uploaded to ImageView sideways:
-//    private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
-//        InputStream input = getContentResolver().openInputStream(selectedImage);
-//        ExifInterface exif = null;
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            if (input != null) {
-//                exif = new ExifInterface(input);
-//            }
-//        }
-//        if (exif == null) {
-//            return bitmap;
-//        }
-//        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-//        int rotationInDegrees = exifToDegrees(orientation);
-//        if (rotationInDegrees == 0) {
-//            return bitmap;
-//        }
-//        Matrix matrix = new Matrix();
-//        matrix.postRotate(rotationInDegrees);
-//        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-//    }
-//
-//    private static int exifToDegrees(int exifOrientation) {
-//        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-//            return 90;
-//        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
-//            return 180;
-//        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
-//            return 270;
-//        }
-//        return 0;
-//    }
+    /**
+     * This logic below needs to be moved to CreatePostActivity to save the image as a Post object to the database
+     * only when all input values have been entered (and validated) by the user.
+     */
 
     // Once the image is in the ImageView, upload it to the Database.
     // Method to upload image to the realtime database as a Post object and upload the image to Firebase Storage (just to test that the image is uploaded correctly)
