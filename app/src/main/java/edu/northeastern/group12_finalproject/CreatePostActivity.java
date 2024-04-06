@@ -186,7 +186,7 @@ public class CreatePostActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                // Check if the intent has a bitmap extra from ImageUploadActivity
+                // Check if the intent has a imageUri extra from ImageUploadActivity
                 Bitmap capturedBitmap = data.getParcelableExtra("uploaded_image");
                 if (capturedBitmap != null) {
                     // Set the captured bitmap to the ImageView
