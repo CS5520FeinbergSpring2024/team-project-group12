@@ -109,6 +109,7 @@
 
                 <!-- Reuse item post design -->
                 <include layout="@layout/item_post"/>
+
             </RelativeLayout>
 
         </RelativeLayout>

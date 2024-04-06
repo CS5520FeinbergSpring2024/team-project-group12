@@ -18,9 +18,11 @@ import android.widget.ProgressBar;
 import android.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class ProfileActivity extends AppCompatActivity {
     private ProgressBar progBar;
+    private FirebaseAuth firebaseAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +31,9 @@ public class ProfileActivity extends AppCompatActivity {
         // Progress bar
         progBar = (ProgressBar) findViewById(R.id.profileProgressBar);
         progBar.setVisibility(View.GONE);
+
+        //init
+        firebaseAuth = FirebaseAuth.getInstance();
 
         // set up of bottom nav bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -53,6 +58,11 @@ public class ProfileActivity extends AppCompatActivity {
         setupToolBar();
 
     }
+
+    private void checkUserStatus() {
+        //get current user
+    }
+
     // set up top tool bar
     private void setupToolBar() {
         androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) findViewById(R.id.profileToolBar);
@@ -76,6 +86,24 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.profile_menu, menu);
         return true;
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return super.onCreateOptionsMenu(menu);
+    }
+
+    /*handle menu item clicks*/
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_logout) {
+            Log.d(TAG, "onOptionsItemSelected: Logout selected");
+            firebaseAuth.signOut();
+            Log.d(TAG, "onOptionsItemSelected: User signed out");
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // method to open up home page activity
@@ -93,4 +121,10 @@ public class ProfileActivity extends AppCompatActivity {
         startActivity(intent);
         finish(); // Close current activity
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
 }
