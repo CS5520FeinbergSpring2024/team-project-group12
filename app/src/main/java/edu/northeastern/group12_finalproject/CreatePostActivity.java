@@ -41,24 +41,29 @@ import java.util.UUID;
 
 public class CreatePostActivity extends AppCompatActivity {
 
+    // Initialize all user-input fields:
     private EditText duration;
     private EditText distance;
     private EditText location;
     private EditText editTextTitle;
     private EditText editTextDescription;
 
+    // initialize layout components
     private Button buttonAddImage;
     private Button buttonUploadPhoto;
     private Button post;
+    private ProgressBar pb;
     private OnPostAddListener listener;
+    // initialize variables to be modified by user action
     private ImageView uploadedPic;
     private Uri imageUri;
     private Bitmap capturedBitmap;
+    // initialize Firebase
     private FirebaseDatabase appDB;
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private DatabaseReference postsRef;
-    private ProgressBar pb;
+    // Permissions Constants
     private static final int PERMISSION_REQUEST = 0;
     private static final int REQUEST_IMAGE_FROM_GALLERY = 1;
     private static final int PERMISSION_REQUEST_CAMERA = 2;
@@ -71,6 +76,7 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_post);
 
         // add progress bar for image upload
+        // Note: Progress bar not visible when image being uploaded to DB
         pb = findViewById(R.id.progressBar);
         pb.setVisibility(View.INVISIBLE);
 
@@ -298,6 +304,8 @@ public class CreatePostActivity extends AppCompatActivity {
      * as adds it to the Realtime Database when all fields of the Post Object are successfully filled out
      */
     private void uploadPostToDatabase() {
+        // show progress bar when image is being uploaded to DB
+        pb.setVisibility(View.VISIBLE);
         if (imageUri != null || capturedBitmap != null) {
             if (imageUri != null) {
                 // Image selected from gallery
@@ -329,6 +337,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                     @Override
                                                     public void onSuccess(Void unused) {
+                                                        // Hide progress bar after successful upload
                                                         pb.setVisibility(View.INVISIBLE);
                                                         Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
                                                     }
@@ -336,6 +345,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 .addOnFailureListener(new OnFailureListener() {
                                                     @Override
                                                     public void onFailure(@NonNull Exception e) {
+                                                        // Hide progress bar after upload failure
+                                                        pb.setVisibility(View.INVISIBLE);
                                                         Toast.makeText(CreatePostActivity.this, "Failed to post.", Toast.LENGTH_SHORT).show();
                                                     }
                                                 });
@@ -347,6 +358,8 @@ public class CreatePostActivity extends AppCompatActivity {
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                // Hide progress bar after upload failure
+                                pb.setVisibility(View.INVISIBLE);
                                 Toast.makeText(getApplicationContext(), "Upload failed.", Toast.LENGTH_SHORT).show();
                             }
                         });
@@ -386,6 +399,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {
+                                                // Hide progress bar after successful upload
                                                 pb.setVisibility(View.INVISIBLE);
                                                 Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
                                             }
@@ -393,6 +407,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
+                                                // Hide progress bar after upload failure
+                                                pb.setVisibility(View.INVISIBLE);
                                                 Toast.makeText(CreatePostActivity.this, "Failed to post.", Toast.LENGTH_SHORT).show();
                                             }
                                         });
@@ -403,11 +419,15 @@ public class CreatePostActivity extends AppCompatActivity {
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        // Hide progress bar after upload failure
+                        pb.setVisibility(View.INVISIBLE);
                         Toast.makeText(getApplicationContext(), "Upload failed.", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         } else {
+            // Hide progress bar if no image selected
+            pb.setVisibility(View.INVISIBLE);
             Toast.makeText(getApplicationContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
         }
     }
