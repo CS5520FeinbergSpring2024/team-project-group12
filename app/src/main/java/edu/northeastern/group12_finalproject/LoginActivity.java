@@ -58,6 +58,33 @@ public class LoginActivity extends AppCompatActivity {
                                     public void onSuccess(AuthResult authResult) {
                                         // Display when login is successful.
                                         Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+
+
+                                        FirebaseUser user = auth.getCurrentUser();
+
+                                        // Get the user email and uid from auth.
+                                        String email = user.getEmail();
+                                        String uid = user.getUid();
+
+                                        // When user is registered store user info in firebase realtime.
+                                        // Using HashMap.
+                                        HashMap<Object, String> hashmap = new HashMap<>();
+
+                                        // Put info in hashmap.
+                                        hashmap.put("email", email);
+                                        hashmap.put("uid", uid);
+                                        hashmap.put("username", "Unknown User"); // To be added in Edit profile
+                                        hashmap.put("bio", "Bio to be added..."); // To be added in Edit profile
+
+                                        // Firebase data base instance.
+                                        FirebaseDatabase db = FirebaseDatabase.getInstance();
+
+                                        // Path to store user data named "Users"
+                                        DatabaseReference reference = db.getReference("Users");
+                                        // put data from hashmap to database.
+                                        reference.child(uid).setValue(hashmap);
+
+
                                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                         finish();
                                     }
