@@ -75,6 +75,10 @@ public class SignUpActivity extends AppCompatActivity {
                                 // Put info in hashmap.
                                 hashmap.put("email", email);
                                 hashmap.put("uid", uid);
+                                // Following.
+                                hashmap.put("following", "0");
+                                // Followed.
+                                hashmap.put("followed", "0");
                                 hashmap.put("username", "Unknown User"); // To be added in Edit profile
                                 hashmap.put("bio", "Bio to be added..."); // To be added in Edit profile
 
@@ -87,7 +91,6 @@ public class SignUpActivity extends AppCompatActivity {
                                 reference.child(uid).setValue(hashmap);
 
                                 // Redirect to homepage.
-                                startActivity(new Intent(SignUpActivity.this, HomePageActivity.class));
                                 startActivity(new Intent(SignUpActivity.this, MainActivity.class));
                             } else {
                                 Toast.makeText(SignUpActivity.this, "Fail to signUp", Toast.LENGTH_SHORT).show();
