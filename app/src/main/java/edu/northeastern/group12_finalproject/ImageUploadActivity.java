@@ -65,20 +65,20 @@ public class ImageUploadActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_upload);
         uploadedPic = findViewById(R.id.imageView);
-        Button uploadBtn = findViewById(R.id.upload);
-        uploadBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Request Permissions to access phone's image gallery:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
-                } else {
-                    // else permission already granted, open gallery to choose picture
-                    choosePicture();
-                }
-            }
-        });
+        // Button uploadBtn = findViewById(R.id.upload); // move this functionality to CreatePostActivity!
+//        uploadBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                // Request Permissions to access phone's image gallery:
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+//                        != PackageManager.PERMISSION_GRANTED) {
+//                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
+//                } else {
+//                    // else permission already granted, open gallery to choose picture
+//                    choosePicture();
+//                }
+//            }
+//        });
 
         // add progress bar for image upload
         pb = findViewById(R.id.progressBar);
@@ -203,7 +203,8 @@ public class ImageUploadActivity extends AppCompatActivity {
                 break;
             case PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    choosePicture();
+                    return;
+                    // choosePicture();
                 } else {
                     Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
                 }
@@ -211,13 +212,13 @@ public class ImageUploadActivity extends AppCompatActivity {
         }
     }
 
-    // Method to select picture from device's gallery
-    private void choosePicture() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, 1);
-    }
+//    // Method to select picture from device's gallery
+//    private void choosePicture() {
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult(intent, 1);
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -241,7 +242,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                 imageUri = data.getData();
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    bitmap = rotateImageIfRequired(bitmap, imageUri);
+                    // bitmap = rotateImageIfRequired(bitmap, imageUri);
                     uploadedPic.setImageBitmap(bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -250,38 +251,38 @@ public class ImageUploadActivity extends AppCompatActivity {
         }
     }
 
-    // Handle chosen image being uploaded to ImageView sideways:
-    private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
-        InputStream input = getContentResolver().openInputStream(selectedImage);
-        ExifInterface exif = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            if (input != null) {
-                exif = new ExifInterface(input);
-            }
-        }
-        if (exif == null) {
-            return bitmap;
-        }
-        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-        int rotationInDegrees = exifToDegrees(orientation);
-        if (rotationInDegrees == 0) {
-            return bitmap;
-        }
-        Matrix matrix = new Matrix();
-        matrix.postRotate(rotationInDegrees);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-    }
-
-    private static int exifToDegrees(int exifOrientation) {
-        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-            return 90;
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
-            return 180;
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
-            return 270;
-        }
-        return 0;
-    }
+//    // Handle chosen image being uploaded to ImageView sideways:
+//    private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
+//        InputStream input = getContentResolver().openInputStream(selectedImage);
+//        ExifInterface exif = null;
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            if (input != null) {
+//                exif = new ExifInterface(input);
+//            }
+//        }
+//        if (exif == null) {
+//            return bitmap;
+//        }
+//        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+//        int rotationInDegrees = exifToDegrees(orientation);
+//        if (rotationInDegrees == 0) {
+//            return bitmap;
+//        }
+//        Matrix matrix = new Matrix();
+//        matrix.postRotate(rotationInDegrees);
+//        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+//    }
+//
+//    private static int exifToDegrees(int exifOrientation) {
+//        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+//            return 90;
+//        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+//            return 180;
+//        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+//            return 270;
+//        }
+//        return 0;
+//    }
 
     // Once the image is in the ImageView, upload it to the Database.
     // Method to upload image to the realtime database as a Post object and upload the image to Firebase Storage (just to test that the image is uploaded correctly)

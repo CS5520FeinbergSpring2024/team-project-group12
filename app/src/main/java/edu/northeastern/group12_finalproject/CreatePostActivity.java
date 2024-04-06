@@ -1,9 +1,15 @@
 package edu.northeastern.group12_finalproject;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +23,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class CreatePostActivity extends AppCompatActivity {
 
     private EditText duration;
@@ -26,8 +35,10 @@ public class CreatePostActivity extends AppCompatActivity {
     private EditText editTextDescription;
 
     private Button buttonAddImage;
+    private Button buttonUploadPhoto;
     private Button post;
     private OnPostAddListener listener;
+    private static final int PERMISSION_REQUEST = 0;
     private static final int REQUEST_CODE_IMAGE_UPLOAD = 101;
 
     @Override
@@ -56,12 +67,30 @@ public class CreatePostActivity extends AppCompatActivity {
         editTextTitle = findViewById(R.id.post_title_edit_text);
         editTextDescription = findViewById(R.id.description_edit_text);
         location = findViewById(R.id.location_edit_text);
+
+        // changed the text on this button to say "Take Photo". This button calls the ImageUploadActivity to start a camera intent
         buttonAddImage = findViewById(R.id.add_photo_button);
         post = findViewById(R.id.post_button);
         buttonAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectImageForPost();
+                captureImageForPost();
+            }
+        });
+
+        // add button to upload a photo that will allow the user to upload a photo from Gallery
+        buttonUploadPhoto = findViewById(R.id.uploadPicBtn);
+        buttonUploadPhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Request Permissions to access phone's image gallery:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
+                } else {
+                    // else permission already granted, open gallery to choose picture
+                    selectImageFromGallery();
+                }
             }
         });
 
@@ -87,12 +116,20 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-    private void selectImageForPost() {
+    // Method to select picture from device's gallery
+    private void selectImageFromGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, 1);
+    }
+
+    private void captureImageForPost() {
         Intent intent = new Intent(CreatePostActivity.this, ImageUploadActivity.class);
         startActivityForResult(intent, REQUEST_CODE_IMAGE_UPLOAD);
     }
 
-    // This method will be called when the ImageUploadActivity finishes
+    // Handle result of gallery selection or photo capture
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -103,7 +140,50 @@ public class CreatePostActivity extends AppCompatActivity {
             // now load the image into an ImageView
             ImageView imageView = findViewById(R.id.postImageView);
             imageView.setImageURI(imageUri);
+        } else if (requestCode == 1 && data != null && data.getData() != null) {
+            Uri imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                bitmap = rotateImageIfRequired(bitmap, imageUri);
+                ImageView imageView = findViewById(R.id.postImageView);
+                imageView.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    // Handle chosen image being uploaded to ImageView sideways:
+    private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
+        InputStream input = getContentResolver().openInputStream(selectedImage);
+        ExifInterface exif = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (input != null) {
+                exif = new ExifInterface(input);
+            }
+        }
+        if (exif == null) {
+            return bitmap;
+        }
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        int rotationInDegrees = exifToDegrees(orientation);
+        if (rotationInDegrees == 0) {
+            return bitmap;
+        }
+        Matrix matrix = new Matrix();
+        matrix.postRotate(rotationInDegrees);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+    private static int exifToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            return 90;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+            return 180;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+            return 270;
+        }
+        return 0;
     }
 
     private void showToast(String message) {
