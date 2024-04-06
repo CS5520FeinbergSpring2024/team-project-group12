@@ -24,9 +24,6 @@
             android:name=".CreatePostActivity"
             android:exported="false" />
         <activity
-            android:name=".ImageUploadActivity"
-            android:exported="false" />
-        <activity
             android:name=".HomePageActivity"
             android:exported="false" />
         <activity
