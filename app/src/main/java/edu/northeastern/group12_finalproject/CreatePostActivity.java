@@ -300,12 +300,48 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     /**
+     * This method takes user input into the fields of CreatePostActivity in order to instantiate a
+     * Post object, which will be added to the database.
+     */
+    private Post createPostFromUserInput(Uri imageUrl) {
+        // retrieve text from EditText fields
+        String title = editTextTitle.getText().toString().trim();
+        String description = editTextDescription.getText().toString().trim();
+        String durationText = duration.getText().toString().trim();
+        String distanceText = distance.getText().toString().trim();
+        String locationText = location.getText().toString().trim();
+
+        // check if all required fields are filled (leave description and location as optional for now)
+        if (title.isEmpty() || description.isEmpty() || durationText.isEmpty() || distanceText.isEmpty() || locationText.isEmpty()) {
+            return null; // return null if any required fields are empty
+        }
+
+        // convert duration and distance into appropriate data types
+        int postDuration = Integer.parseInt(durationText);
+        float postDistance = Float.parseFloat(distanceText);
+
+        // create and return Post object
+        return new Post("postId", "username", System.currentTimeMillis(), imageUri.toString(), title, description, postDuration, postDistance);
+    }
+
+    /**
      * This logic takes the image that is in the ImageView and adds it to Firebase Storage, as well
      * as adds it to the Realtime Database when all fields of the Post Object are successfully filled out
      */
     private void uploadPostToDatabase() {
         // show progress bar when image is being uploaded to DB
         pb.setVisibility(View.VISIBLE);
+        // added:
+        Post post = createPostFromUserInput(imageUri);
+
+        // handle potential null
+        if (post == null) {
+            // notify user and return
+            Toast.makeText(CreatePostActivity.this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
+            pb.setVisibility(View.INVISIBLE);
+            return;
+        }
+
         if (imageUri != null || capturedBitmap != null) {
             if (imageUri != null) {
                 // Image selected from gallery
@@ -323,7 +359,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     public void onSuccess(Uri uri) {
                                         String imageUrl = uri.toString();
                                         // create new Post object with image
-                                        Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
+                                        // Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
 
                                         // get reference to Realtime DB
                                         appDB = FirebaseDatabase.getInstance();
