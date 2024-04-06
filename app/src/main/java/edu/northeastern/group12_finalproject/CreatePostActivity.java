@@ -94,11 +94,9 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         });
 
-        // get the ImageView from the layout
+        // get the ImageView for the layout (either captured via camera (bitmap) or uploaded from gallery (uri))
         ImageView imageView = findViewById(R.id.postImageView);
-
         // Retrieve the bitmap from the intent
-        // This works for CAPTURED images, not those uploaded from gallery. If uploaded from gallery, app crashes.
         if (getIntent().hasExtra("uploaded_image")) {
             Bitmap bitmap = getIntent().getParcelableExtra("uploaded_image");
             if (bitmap != null) {
@@ -111,8 +109,21 @@ public class CreatePostActivity extends AppCompatActivity {
             String imageUriString = getIntent().getStringExtra("uploaded_image_uri");
             Uri imageUri = Uri.parse(imageUriString);
             imageView.setImageURI(imageUri);
-        } else {
-            Toast.makeText(this, "No image found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // show Toast if Gallery permissions not granted
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUEST:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    selectImageFromGallery(); // Call method to select image after permission is granted
+                } else {
+                    Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
+                }
+                break;
         }
     }
 
