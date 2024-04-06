@@ -15,14 +15,33 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class ProfileActivity extends AppCompatActivity {
+
+    FirebaseAuth firebaseAuth;
+    FirebaseUser user;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+
+    TextView profileName;
+    TextView displayNameTv;
+    TextView bio;
+    TextView editTv;
+
     private ProgressBar progBar;
-    private FirebaseAuth firebaseAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,8 +51,17 @@ public class ProfileActivity extends AppCompatActivity {
         progBar = (ProgressBar) findViewById(R.id.profileProgressBar);
         progBar.setVisibility(View.GONE);
 
-        //init
-        firebaseAuth = FirebaseAuth.getInstance();
+        retrieveFirebaseInfo();
+
+        // Take you to edit profile page.
+        editTv = findViewById(R.id.tvEditProfile);
+        editTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class));
+            }
+        });
+
 
         // set up of bottom nav bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -59,10 +87,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    private void checkUserStatus() {
-        //get current user
-    }
-
     // set up top tool bar
     private void setupToolBar() {
         androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) findViewById(R.id.profileToolBar);
@@ -86,24 +110,7 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.profile_menu, menu);
         return true;
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return super.onCreateOptionsMenu(menu);
-    }
 
-    /*handle menu item clicks*/
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_logout) {
-            Log.d(TAG, "onOptionsItemSelected: Logout selected");
-            firebaseAuth.signOut();
-            Log.d(TAG, "onOptionsItemSelected: User signed out");
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     // method to open up home page activity
@@ -122,9 +129,43 @@ public class ProfileActivity extends AppCompatActivity {
         finish(); // Close current activity
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    // Retrieve user info from firebase.
+    private void retrieveFirebaseInfo() {
+        firebaseAuth = FirebaseAuth.getInstance();
+        user = firebaseAuth.getCurrentUser();
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference("Users");
+
+        // Initial View set up.
+        profileName = findViewById(R.id.profileName);
+        bio = findViewById(R.id.bio);
+        displayNameTv = findViewById(R.id.display_name);
+
+        Query query = databaseReference.orderByChild("email").equalTo(user.getEmail());
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Check until required data gets updated
+                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+                    // Retrieve data
+                    String name = "" + dataSnapshot.child("username").getValue();
+                    String bioData = "" + dataSnapshot.child("bio").getValue();
+                    String email = "" + dataSnapshot.child("email").getValue();
+
+                    // Set data to textView.
+                    profileName.setText(email);
+                    displayNameTv.setText(name);
+                    bio.setText(bioData);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
 }

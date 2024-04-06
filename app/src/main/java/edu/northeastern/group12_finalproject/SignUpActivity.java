@@ -16,6 +16,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 /**
  * Inspired by Android Knowledge https://www.youtube.com/watch?v=TStttJRAPhE.
@@ -57,7 +62,32 @@ public class SignUpActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 Toast.makeText(SignUpActivity.this, "You have successfully sign up an acount", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
+                                FirebaseUser user = auth.getCurrentUser();
+
+                                // Get the user email and uid from auth.
+                                String email = user.getEmail();
+                                String uid = user.getUid();
+
+                                // When user is registered store user info in firebase realtime.
+                                // Using HashMap.
+                                HashMap<Object, String> hashmap = new HashMap<>();
+
+                                // Put info in hashmap.
+                                hashmap.put("email", email);
+                                hashmap.put("uid", uid);
+                                hashmap.put("username", "Unknown User"); // To be added in Edit profile
+                                hashmap.put("bio", "Bio to be added..."); // To be added in Edit profile
+
+                                // Firebase data base instance.
+                                FirebaseDatabase db = FirebaseDatabase.getInstance();
+
+                                // Path to store user data named "Users"
+                                DatabaseReference reference = db.getReference("Users");
+                                // put data from hashmap to database.
+                                reference.child(uid).setValue(hashmap);
+
+                                // Redirect to homepage.
+                                startActivity(new Intent(SignUpActivity.this, HomePageActivity.class));
                             } else {
                                 Toast.makeText(SignUpActivity.this, "Fail to signUp", Toast.LENGTH_SHORT).show();
                             }
