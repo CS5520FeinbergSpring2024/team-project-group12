@@ -60,7 +60,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private ProgressBar pb;
     private static final int PERMISSION_REQUEST = 0;
     private static final int REQUEST_IMAGE_FROM_GALLERY = 1;
-    private static final int REQUEST_CODE_IMAGE_UPLOAD = 101;
+    private static final int REQUEST_IMAGE_CAPTURE = 3;
 
 
     @Override
@@ -131,6 +131,7 @@ public class CreatePostActivity extends AppCompatActivity {
         if (getIntent().hasExtra("uploaded_image")) {
             Bitmap bitmap = getIntent().getParcelableExtra("uploaded_image");
             if (bitmap != null) {
+                capturedBitmap = bitmap;
                 imageView.setImageBitmap(bitmap);
             } else {
                 Toast.makeText(this, "Failed to retrieve image", Toast.LENGTH_SHORT).show();
@@ -176,7 +177,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private void captureImageForPost() {
         Intent intent = new Intent(CreatePostActivity.this, ImageUploadActivity.class);
-        startActivityForResult(intent, REQUEST_CODE_IMAGE_UPLOAD);
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
     }
 
     // Handle result: image either uploaded from or photo capture
@@ -184,7 +185,7 @@ public class CreatePostActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_CODE_IMAGE_UPLOAD && data != null) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
                 // Check if the intent has a bitmap extra from ImageUploadActivity
                 Bitmap capturedBitmap = data.getParcelableExtra("uploaded_image");
                 if (capturedBitmap != null) {
@@ -200,6 +201,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     bitmap = rotateImageIfRequired(bitmap, imageUri);
                     ImageView imageView = findViewById(R.id.postImageView);
                     imageView.setImageBitmap(bitmap);
+                    capturedBitmap = bitmap;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

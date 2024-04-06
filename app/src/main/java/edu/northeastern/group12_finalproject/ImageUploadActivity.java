@@ -173,7 +173,7 @@ public class ImageUploadActivity extends AppCompatActivity {
                         imageUri = null;
 
                         // Automatically return the image to CreatePostActivity
-                        returnCapturedImage();
+                        returnCapturedImage(imageBitmap);
                     }
                 }
             }
@@ -181,16 +181,14 @@ public class ImageUploadActivity extends AppCompatActivity {
     }
 
     // Method to return captured image back to CreatePostActivity
-    private void returnCapturedImage() {
-        if (uploadedPic.getDrawable() != null) {
-            Drawable drawable = uploadedPic.getDrawable();
-            if (drawable instanceof BitmapDrawable) {
-                Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                Intent intent = new Intent();
-                intent.putExtra("uploaded_image", bitmap);
-                setResult(RESULT_OK, intent);
-                finish();
-            }
+    private void returnCapturedImage(Bitmap bitmap) {
+        if (bitmap != null) {
+            Intent intent = new Intent();
+            intent.putExtra("uploaded_image", bitmap);
+            setResult(RESULT_OK, intent);
+            finish();
+        } else {
+            Toast.makeText(this, "No image captured", Toast.LENGTH_SHORT).show();
         }
     }
 
