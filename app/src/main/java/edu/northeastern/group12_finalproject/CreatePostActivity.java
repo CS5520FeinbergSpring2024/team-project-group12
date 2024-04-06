@@ -61,6 +61,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private ProgressBar pb;
     private static final int PERMISSION_REQUEST = 0;
     private static final int REQUEST_IMAGE_FROM_GALLERY = 1;
+    private static final int PERMISSION_REQUEST_CAMERA = 2;
     private static final int REQUEST_IMAGE_CAPTURE = 3;
 
 
@@ -106,7 +107,8 @@ public class CreatePostActivity extends AppCompatActivity {
         buttonAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                captureImageForPost();
+                // captureImageForPost();
+                startCameraIntent();
             }
         });
 
@@ -127,13 +129,14 @@ public class CreatePostActivity extends AppCompatActivity {
         });
 
         // get the ImageView for the layout (either captured via camera (bitmap) or uploaded from gallery (uri))
-        ImageView imageView = findViewById(R.id.postImageView);
+        uploadedPic = findViewById(R.id.postImageView);
+
         // Retrieve the bitmap from the intent
         if (getIntent().hasExtra("uploaded_image")) {
             Bitmap bitmap = getIntent().getParcelableExtra("uploaded_image");
             if (bitmap != null) {
                 capturedBitmap = bitmap;
-                imageView.setImageBitmap(bitmap);
+                uploadedPic.setImageBitmap(bitmap);
             } else {
                 Toast.makeText(this, "Failed to retrieve image", Toast.LENGTH_SHORT).show();
             }
@@ -141,7 +144,7 @@ public class CreatePostActivity extends AppCompatActivity {
             // Retrieve the image URI from the intent
             String imageUriString = getIntent().getStringExtra("uploaded_image_uri");
             Uri imageUri = Uri.parse(imageUriString);
-            imageView.setImageURI(imageUri);
+            uploadedPic.setImageURI(imageUri);
         }
 
         post = findViewById(R.id.post_button);
@@ -153,14 +156,58 @@ public class CreatePostActivity extends AppCompatActivity {
         });
     }
 
+    private void startCameraIntent() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                return;
+            }
+        }
+        // if camera permission is granted, start camera intent
+        dispatchTakePictureIntent();
+    }
+
+    // method to start camera intent
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } else {
+            // This Toast appears on my emulator when I try to take picture with camera
+            Toast.makeText(this, "No camera app found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // show Toast if Gallery permissions not granted
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        switch (requestCode) {
+//            case PERMISSION_REQUEST:
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    selectImageFromGallery(); // Call method to select image after permission is granted
+//                } else {
+//                    Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
+//                }
+//                break;
+//        }
+//    }
+
+    // Show message if permissions not granted
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
+            case PERMISSION_REQUEST_CAMERA:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dispatchTakePictureIntent();
+                } else {
+                    Toast.makeText(this, "Camera permission not granted", Toast.LENGTH_SHORT).show();
+                }
+                break;
             case PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    selectImageFromGallery(); // Call method to select image after permission is granted
+                    selectImageFromGallery();
                 } else {
                     Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
                 }
@@ -176,10 +223,10 @@ public class CreatePostActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
-    private void captureImageForPost() {
-        Intent intent = new Intent(CreatePostActivity.this, ImageUploadActivity.class);
-        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-    }
+//    private void captureImageForPost() {
+//        Intent intent = new Intent(CreatePostActivity.this, ImageUploadActivity.class);
+//        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+//    }
 
     // Handle result: image either uploaded from or photo capture
     @Override
@@ -187,22 +234,25 @@ public class CreatePostActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                // Check if the intent has a imageUri extra from ImageUploadActivity
-                Bitmap capturedBitmap = data.getParcelableExtra("uploaded_image");
-                if (capturedBitmap != null) {
-                    // Set the captured bitmap to the ImageView
-                    ImageView imageView = findViewById(R.id.postImageView);
-                    imageView.setImageBitmap(capturedBitmap);
+                // Camera intent result
+                Bundle extras = data.getExtras();
+                if (extras != null && extras.containsKey("data")) {
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    if (imageBitmap != null) {
+                        // set captured image to ImageView
+                        uploadedPic.setImageBitmap(imageBitmap);
+                        // set capturedBitmap variable
+                        capturedBitmap = imageBitmap;
+                        // set imageUri to null because image captured by camera doesn't have uri
+                        imageUri = null;
+                    }
                 }
-            } else if (requestCode == REQUEST_IMAGE_FROM_GALLERY && data != null && data.getData() != null) {
-                // Gallery intent result
-                Uri imageUri = data.getData();
+            } else if (requestCode == 1 && data != null && data.getData() != null) {
+                imageUri = data.getData();
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                     bitmap = rotateImageIfRequired(bitmap, imageUri);
-                    ImageView imageView = findViewById(R.id.postImageView);
-                    imageView.setImageBitmap(bitmap);
-                    capturedBitmap = bitmap;
+                    uploadedPic.setImageBitmap(bitmap);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -265,7 +315,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     public void onSuccess(Uri uri) {
                                         String imageUrl = uri.toString();
                                         // create new Post object with image
-                                        Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "title", "description", 0, 0.0f);
+                                        Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
 
                                         // get reference to Realtime DB
                                         appDB = FirebaseDatabase.getInstance();
@@ -309,7 +359,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
                 // create random key for imageID
                 final String randomKey = UUID.randomUUID().toString();
-                StorageReference imageRef = storageRef.child("images/" + randomKey);
+                StorageReference imageRef = storageRef.child("images/" + randomKey + ".jpg");
 
                 // Upload byte array to Firebase Storage
                 UploadTask uploadTask = imageRef.putBytes(data);
@@ -322,7 +372,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             public void onSuccess(Uri uri) {
                                 String imageUrl = uri.toString();
                                 // create new Post object with image
-                                Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl,"title", "description", 0, 0.0f);
+                                Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
 
                                 // get reference to Realtime DB
                                 appDB = FirebaseDatabase.getInstance();
@@ -361,6 +411,7 @@ public class CreatePostActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
