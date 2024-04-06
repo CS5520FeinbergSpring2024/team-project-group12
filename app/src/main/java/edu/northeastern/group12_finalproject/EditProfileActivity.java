@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -42,13 +43,17 @@ public class EditProfileActivity extends AppCompatActivity {
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                retrieveFirebaseInfo();
+                int exitCode = retrieveFirebaseInfo();
+                if (exitCode == 1) {
+                    startActivity(new Intent(EditProfileActivity.this, ProfileActivity.class));
+                    finish();
+                }
             }
         });
     }
 
     // Retrieve user info from firebase.
-    private void retrieveFirebaseInfo() {
+    private int retrieveFirebaseInfo() {
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -57,7 +62,9 @@ public class EditProfileActivity extends AppCompatActivity {
         // Initial View set up.
         if ((nameET.getText().toString().isEmpty()) && (bioET.getText().toString().isEmpty())) {
             Toast.makeText(this, "Name and bio cannot be null", Toast.LENGTH_LONG);
+            return 0;
         }
+
 
         if (!(nameET.getText().toString().isEmpty())) {
             databaseReference.child(user.getUid()).child("username").setValue(nameET.getText().toString());
@@ -65,6 +72,7 @@ public class EditProfileActivity extends AppCompatActivity {
         if (!(bioET.getText().toString().isEmpty())) {
             databaseReference.child(user.getUid()).child("bio").setValue(bioET.getText().toString());
         }
+        return 1;
 
 
 

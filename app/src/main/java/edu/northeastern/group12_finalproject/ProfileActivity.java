@@ -36,6 +36,7 @@ public class ProfileActivity extends AppCompatActivity {
     DatabaseReference databaseReference;
 
     TextView profileName;
+    TextView displayNameTv;
     TextView bio;
     TextView editTv;
 
@@ -57,7 +58,6 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class));
-                finish();
             }
         });
 
@@ -134,6 +134,7 @@ public class ProfileActivity extends AppCompatActivity {
         // Initial View set up.
         profileName = findViewById(R.id.profileName);
         bio = findViewById(R.id.bio);
+        displayNameTv = findViewById(R.id.display_name);
 
         Query query = databaseReference.orderByChild("email").equalTo(user.getEmail());
 
@@ -145,9 +146,11 @@ public class ProfileActivity extends AppCompatActivity {
                     // Retrieve data
                     String name = "" + dataSnapshot.child("username").getValue();
                     String bioData = "" + dataSnapshot.child("bio").getValue();
+                    String email = "" + dataSnapshot.child("email").getValue();
 
                     // Set data to textView.
-                    profileName.setText(name);
+                    profileName.setText(email);
+                    displayNameTv.setText(name);
                     bio.setText(bioData);
 
                 }
