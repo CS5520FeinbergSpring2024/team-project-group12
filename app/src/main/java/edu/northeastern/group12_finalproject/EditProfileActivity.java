@@ -65,13 +65,28 @@ public class EditProfileActivity extends AppCompatActivity {
             return 0;
         }
 
+        Query userQuery = databaseReference.orderByChild("email").equalTo(user.getEmail());
 
-        if (!(nameET.getText().toString().isEmpty())) {
-            databaseReference.child(user.getUid()).child("username").setValue(nameET.getText().toString());
-        }
-        if (!(bioET.getText().toString().isEmpty())) {
-            databaseReference.child(user.getUid()).child("bio").setValue(bioET.getText().toString());
-        }
+        userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+                    if (!(nameET.getText().toString().isEmpty())) {
+                        dataSnapshot.child("username").getRef().setValue(nameET.getText().toString());
+                    }
+                    if (!(bioET.getText().toString().isEmpty())) {
+                        dataSnapshot.child("bio").getRef().setValue(bioET.getText().toString());
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         return 1;
 
 
