@@ -59,7 +59,6 @@ public class ImageUploadActivity extends AppCompatActivity {
     private ProgressBar pb;
 
 
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,38 +74,40 @@ public class ImageUploadActivity extends AppCompatActivity {
 
         // initialize Firebase app
         FirebaseApp.initializeApp(this);
+        // automatically launch camera intent once Activity launched
+        startCameraIntent();
 
-        Button cameraBtn = findViewById(R.id.cameraBtn);
-        cameraBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startCameraIntent();
-            }
-        });
+//        Button cameraBtn = findViewById(R.id.cameraBtn);
+//        cameraBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startCameraIntent();
+//            }
+//        });
 
         /**
          * This method takes the image captured from the camera and sets it into the ImageView in the
          * CreatePostActivity to be shown with other Post input values
          */
-        Button addToPostBtn = findViewById(R.id.addToPost);
-        addToPostBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Check if the uploadedPic ImageView is not null and has a drawable (when captured via camera):
-                if (uploadedPic.getDrawable() != null) {
-                    Drawable drawable = uploadedPic.getDrawable();
-                    if (drawable instanceof BitmapDrawable) {
-                        // If the drawable is a bitmap, pass it directly
-                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                        Intent intent = new Intent(ImageUploadActivity.this, CreatePostActivity.class);
-                        intent.putExtra("uploaded_image", bitmap);
-                        startActivity(intent);
-                    }
-                } else {
-                    Toast.makeText(ImageUploadActivity.this, "No image found", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+//        Button addToPostBtn = findViewById(R.id.addToPost);
+//        addToPostBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // Check if the uploadedPic ImageView is not null and has a drawable (when captured via camera):
+//                if (uploadedPic.getDrawable() != null) {
+//                    Drawable drawable = uploadedPic.getDrawable();
+//                    if (drawable instanceof BitmapDrawable) {
+//                        // If the drawable is a bitmap, pass it directly
+//                        Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+//                        Intent intent = new Intent(ImageUploadActivity.this, CreatePostActivity.class);
+//                        intent.putExtra("uploaded_image", bitmap);
+//                        startActivity(intent);
+//                    }
+//                } else {
+//                    Toast.makeText(ImageUploadActivity.this, "No image found", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
     }
 
     private void startCameraIntent() {
@@ -170,17 +171,25 @@ public class ImageUploadActivity extends AppCompatActivity {
                         capturedBitmap = imageBitmap;
                         // set imageUri to null because image captured by camera doesn't have uri
                         imageUri = null;
+
+                        // Automatically return the image to CreatePostActivity
+                        returnCapturedImage();
                     }
                 }
-            } else if (requestCode == 1 && data != null && data.getData() != null) {
-                imageUri = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    // bitmap = rotateImageIfRequired(bitmap, imageUri);
-                    uploadedPic.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            }
+        }
+    }
+
+    // Method to return captured image back to CreatePostActivity
+    private void returnCapturedImage() {
+        if (uploadedPic.getDrawable() != null) {
+            Drawable drawable = uploadedPic.getDrawable();
+            if (drawable instanceof BitmapDrawable) {
+                Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                Intent intent = new Intent();
+                intent.putExtra("uploaded_image", bitmap);
+                setResult(RESULT_OK, intent);
+                finish();
             }
         }
     }

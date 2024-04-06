@@ -39,6 +39,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private Button post;
     private OnPostAddListener listener;
     private static final int PERMISSION_REQUEST = 0;
+    private static final int REQUEST_IMAGE_FROM_GALLERY = 1;
     private static final int REQUEST_CODE_IMAGE_UPLOAD = 101;
 
     @Override
@@ -140,29 +141,34 @@ public class CreatePostActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_CODE_IMAGE_UPLOAD);
     }
 
-    // Handle result of gallery selection or photo capture
+    // Handle result: image either uploaded from or photo capture
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_IMAGE_UPLOAD && resultCode == RESULT_OK && data != null) {
-            // get the imageURI from data intent
-            Uri imageUri = data.getData();
-
-            // now load the image into an ImageView
-            ImageView imageView = findViewById(R.id.postImageView);
-            imageView.setImageURI(imageUri);
-        } else if (requestCode == 1 && data != null && data.getData() != null) {
-            Uri imageUri = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                bitmap = rotateImageIfRequired(bitmap, imageUri);
-                ImageView imageView = findViewById(R.id.postImageView);
-                imageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_CODE_IMAGE_UPLOAD && data != null) {
+                // Check if the intent has a bitmap extra from ImageUploadActivity
+                Bitmap capturedBitmap = data.getParcelableExtra("uploaded_image");
+                if (capturedBitmap != null) {
+                    // Set the captured bitmap to the ImageView
+                    ImageView imageView = findViewById(R.id.postImageView);
+                    imageView.setImageBitmap(capturedBitmap);
+                }
+            } else if (requestCode == REQUEST_IMAGE_FROM_GALLERY && data != null && data.getData() != null) {
+                // Gallery intent result
+                Uri imageUri = data.getData();
+                try {
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                    bitmap = rotateImageIfRequired(bitmap, imageUri);
+                    ImageView imageView = findViewById(R.id.postImageView);
+                    imageView.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
+
 
     // Handle chosen image being uploaded to ImageView sideways:
     private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
