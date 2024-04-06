@@ -15,16 +15,28 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 public class CreatePostActivity extends AppCompatActivity {
 
@@ -38,14 +50,33 @@ public class CreatePostActivity extends AppCompatActivity {
     private Button buttonUploadPhoto;
     private Button post;
     private OnPostAddListener listener;
+    private ImageView uploadedPic;
+    private Uri imageUri;
+    private Bitmap capturedBitmap;
+    private FirebaseDatabase appDB;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
+    private DatabaseReference postsRef;
+    private ProgressBar pb;
     private static final int PERMISSION_REQUEST = 0;
     private static final int REQUEST_IMAGE_FROM_GALLERY = 1;
     private static final int REQUEST_CODE_IMAGE_UPLOAD = 101;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_post);
+
+        // add progress bar for image upload
+        pb = findViewById(R.id.progressBar);
+        pb.setVisibility(View.INVISIBLE);
+
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+
+        // initialize Firebase app
+        FirebaseApp.initializeApp(this);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.bottom_nav_new_post);
@@ -71,7 +102,6 @@ public class CreatePostActivity extends AppCompatActivity {
 
         // changed the text on this button to say "Take Photo". This button calls the ImageUploadActivity to start a camera intent
         buttonAddImage = findViewById(R.id.add_photo_button);
-        post = findViewById(R.id.post_button);
         buttonAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,6 +141,14 @@ public class CreatePostActivity extends AppCompatActivity {
             Uri imageUri = Uri.parse(imageUriString);
             imageView.setImageURI(imageUri);
         }
+
+        post = findViewById(R.id.post_button);
+        post.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadPostToDatabase();
+            }
+        });
     }
 
     // show Toast if Gallery permissions not granted
@@ -169,7 +207,6 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-
     // Handle chosen image being uploaded to ImageView sideways:
     private Bitmap rotateImageIfRequired(Bitmap bitmap, Uri selectedImage) throws IOException {
         InputStream input = getContentResolver().openInputStream(selectedImage);
@@ -201,6 +238,125 @@ public class CreatePostActivity extends AppCompatActivity {
             return 270;
         }
         return 0;
+    }
+
+    /**
+     * This logic takes the image that is in the ImageView and adds it to Firebase Storage, as well
+     * as adds it to the Realtime Database when all fields of the Post Object are successfully filled out
+     */
+    private void uploadPostToDatabase() {
+        if (imageUri != null || capturedBitmap != null) {
+            if (imageUri != null) {
+                // Image selected from gallery
+                // create random key for imageID
+                final String randomKey = UUID.randomUUID().toString();
+                StorageReference imageRef = storageRef.child("images/" + randomKey);
+
+                imageRef.putFile(imageUri)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                // get download URL of the uploaded image
+                                imageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        String imageUrl = uri.toString();
+                                        // create new Post object with image
+                                        Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "title", "description", 0, 0.0f);
+
+                                        // get reference to Realtime DB
+                                        appDB = FirebaseDatabase.getInstance();
+                                        postsRef = appDB.getReference().child("posts");
+
+                                        // generate unique key for post
+                                        String postId = postsRef.push().getKey();
+
+                                        // save the post to the Realtime DB using key
+                                        postsRef.child(postId).setValue(post)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void unused) {
+                                                        pb.setVisibility(View.INVISIBLE);
+                                                        Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Toast.makeText(CreatePostActivity.this, "Failed to post.", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    }
+                                });
+                                Snackbar.make(findViewById(android.R.id.content), "Image uploaded.", Snackbar.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getApplicationContext(), "Upload failed.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            } else if (capturedBitmap != null) {
+                // Image captured by the camera
+                // Convert capturedBitmap to byte array
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                capturedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+
+                // create random key for imageID
+                final String randomKey = UUID.randomUUID().toString();
+                StorageReference imageRef = storageRef.child("images/" + randomKey);
+
+                // Upload byte array to Firebase Storage
+                UploadTask uploadTask = imageRef.putBytes(data);
+                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get the download URL
+                        imageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String imageUrl = uri.toString();
+                                // create new Post object with image
+                                Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl,"title", "description", 0, 0.0f);
+
+                                // get reference to Realtime DB
+                                appDB = FirebaseDatabase.getInstance();
+                                postsRef = appDB.getReference().child("posts");
+
+                                // generate unique key for post
+                                String postId = postsRef.push().getKey();
+
+                                // save the post to the Realtime DB using key
+                                postsRef.child(postId).setValue(post)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                pb.setVisibility(View.INVISIBLE);
+                                                Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(CreatePostActivity.this, "Failed to post.", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
+                        });
+                        Snackbar.make(findViewById(android.R.id.content), "Image uploaded.", Snackbar.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), "Upload failed.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showToast(String message) {
