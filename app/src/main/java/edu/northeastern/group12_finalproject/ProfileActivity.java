@@ -4,6 +4,8 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -28,6 +30,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.List;
+
 public class ProfileActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
@@ -41,11 +45,20 @@ public class ProfileActivity extends AppCompatActivity {
     TextView editTv;
 
     private ProgressBar progBar;
+    private List<Post> posts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        RecyclerView recyclerView = findViewById(R.id.profileRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Set up adapter
+        PostAdapter adapter = new PostAdapter(posts);
+        recyclerView.setAdapter(adapter);
+
 
         // Progress bar
         progBar = (ProgressBar) findViewById(R.id.profileProgressBar);
