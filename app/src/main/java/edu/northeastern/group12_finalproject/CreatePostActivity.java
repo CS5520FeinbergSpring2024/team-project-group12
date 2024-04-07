@@ -282,7 +282,7 @@ public class CreatePostActivity extends AppCompatActivity {
      * This method takes user input into the fields of CreatePostActivity in order to instantiate a
      * Post object, which will be added to the database.
      */
-    private Post createPostFromUserInput(Uri imageUrl) {
+    private Post createPostFromUserInput() {
         // retrieve text from EditText fields
         String title = editTextTitle.getText().toString().trim();
         String description = editTextDescription.getText().toString().trim();
@@ -300,7 +300,7 @@ public class CreatePostActivity extends AppCompatActivity {
         float postDistance = Float.parseFloat(distanceText);
 
         // create and return Post object
-        return new Post("postId", "username", System.currentTimeMillis(), imageUrl != null ? imageUrl.toString() : null, title, description, postDuration, postDistance);    }
+        return new Post("postId", "username", System.currentTimeMillis(), null, title, description, postDuration, postDistance);    }
 
     /**
      * This logic takes the image that is in the ImageView and adds it to Firebase Storage, as well
@@ -311,7 +311,7 @@ public class CreatePostActivity extends AppCompatActivity {
         // show progress bar when image is being uploaded to DB
         pb.setVisibility(View.VISIBLE);
         // added:
-        Post post = createPostFromUserInput(imageUri);
+        Post post = createPostFromUserInput();
 
         // handle potential null
         if (post == null) {
@@ -337,9 +337,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         String imageUrl = uri.toString();
-                                        // create new Post object with image
-                                        // Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
-
+                                        post.setImageUrl(imageUrl);
                                         // get reference to Realtime DB
                                         appDB = FirebaseDatabase.getInstance();
                                         postsRef = appDB.getReference().child("posts");
@@ -401,9 +399,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Uri uri) {
                                 String imageUrl = uri.toString();
-                                // create new Post object with image
-                                // Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
-
+                                post.setImageUrl(imageUrl);
                                 // get reference to Realtime DB
                                 appDB = FirebaseDatabase.getInstance();
                                 postsRef = appDB.getReference().child("posts");
