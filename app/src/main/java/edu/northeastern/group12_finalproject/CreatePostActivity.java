@@ -325,7 +325,8 @@ public class CreatePostActivity extends AppCompatActivity {
 
     /**
      * This logic takes the image that is in the ImageView and adds it to Firebase Storage, as well
-     * as adds it to the Realtime Database when all fields of the Post Object are successfully filled out
+     * as adds it to the Realtime Database when all fields of the Post Object are successfully filled out.
+     * Upon successful addition to the database, the user is navigated back to the MainFeed.
      */
     private void uploadPostToDatabase() {
         // show progress bar when image is being uploaded to DB
@@ -375,6 +376,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                                         // Hide progress bar after successful upload
                                                         pb.setVisibility(View.INVISIBLE);
                                                         Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
+                                                        // navigate back to the MainFeed
+                                                        openHomePage();
                                                     }
                                                 })
                                                 .addOnFailureListener(new OnFailureListener() {
@@ -437,6 +440,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 // Hide progress bar after successful upload
                                                 pb.setVisibility(View.INVISIBLE);
                                                 Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
+                                                // navigate back to the MainFeed
+                                                openHomePage();
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
@@ -492,4 +497,13 @@ public class CreatePostActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+    /**
+     * To do still:
+     * - initialize each post with 0 likes, 0 comments
+     * - input validations
+     *      - title <= 20 characters
+     *      - distance: float
+     *      - duration: int,
+     */
 }
