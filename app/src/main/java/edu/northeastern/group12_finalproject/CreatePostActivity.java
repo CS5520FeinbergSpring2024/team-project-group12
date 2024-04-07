@@ -65,9 +65,10 @@ public class CreatePostActivity extends AppCompatActivity {
     private DatabaseReference postsRef;
     // Permissions Constants
     private static final int PERMISSION_REQUEST = 0;
-    private static final int REQUEST_IMAGE_FROM_GALLERY = 1;
-    private static final int PERMISSION_REQUEST_CAMERA = 2;
-    private static final int REQUEST_IMAGE_CAPTURE = 3;
+    private static final int PERMISSION_REQUEST_READ_MEDIA_IMAGES = 1;
+    private static final int REQUEST_PICK_IMAGE = 2;
+    private static final int PERMISSION_REQUEST_CAMERA = 3;
+    private static final int REQUEST_IMAGE_CAPTURE = 4;
 
 
     @Override
@@ -113,8 +114,18 @@ public class CreatePostActivity extends AppCompatActivity {
         buttonAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // captureImageForPost();
-                startCameraIntent();
+                // Check camera permission before starting camera intent
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                    } else {
+                        // Permission already granted, start camera intent
+                        dispatchTakePictureIntent();
+                    }
+                } else {
+                    // For versions below Android M, start camera intent directly
+                    dispatchTakePictureIntent();
+                }
             }
         });
 
@@ -124,11 +135,11 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Request Permissions to access phone's image gallery:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
                 } else {
-                    // else permission already granted, open gallery to choose picture
+                    // Permission already granted or not required, open gallery to choose picture
                     selectImageFromGallery();
                 }
             }
@@ -162,105 +173,73 @@ public class CreatePostActivity extends AppCompatActivity {
         });
     }
 
-    private void startCameraIntent() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
-                return;
-            }
-        }
-        // if camera permission is granted, start camera intent
-        dispatchTakePictureIntent();
-    }
 
     // method to start camera intent
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        try {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        } else {
-            // This Toast appears on my emulator when I try to take picture with camera
-            Toast.makeText(this, "No camera app found", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error starting camera", Toast.LENGTH_SHORT).show();
         }
     }
-
-    // show Toast if Gallery permissions not granted
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        switch (requestCode) {
-//            case PERMISSION_REQUEST:
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    selectImageFromGallery(); // Call method to select image after permission is granted
-//                } else {
-//                    Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
-//                }
-//                break;
-//        }
-//    }
 
     // Show message if permissions not granted
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    dispatchTakePictureIntent();
-                } else {
-                    Toast.makeText(this, "Camera permission not granted", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case PERMISSION_REQUEST:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    selectImageFromGallery();
-                } else {
-                    Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
-                }
-                break;
+        Log.d("PermissionDebug", "Request Code: " + requestCode);
+        if (requestCode == PERMISSION_REQUEST_READ_MEDIA_IMAGES || requestCode == PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, launch gallery
+                selectImageFromGallery();
+            } else {
+                // Permission denied, show a message to the user
+                Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == PERMISSION_REQUEST_CAMERA) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, start camera intent
+                dispatchTakePictureIntent();
+            } else {
+                // Permission denied, show a message to the user
+                Toast.makeText(this, "Camera permission not granted", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     // Method to select picture from device's gallery
     private void selectImageFromGallery() {
-        Intent intent = new Intent();
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, REQUEST_PICK_IMAGE);
     }
-
-//    private void captureImageForPost() {
-//        Intent intent = new Intent(CreatePostActivity.this, ImageUploadActivity.class);
-//        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
-//    }
 
     // Handle result: image either uploaded from or photo capture
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                // Camera intent result
-                Bundle extras = data.getExtras();
-                if (extras != null && extras.containsKey("data")) {
-                    Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    if (imageBitmap != null) {
-                        // set captured image to ImageView
-                        uploadedPic.setImageBitmap(imageBitmap);
-                        // set capturedBitmap variable
-                        capturedBitmap = imageBitmap;
-                        // set imageUri to null because image captured by camera doesn't have uri
-                        imageUri = null;
-                    }
-                }
-            } else if (requestCode == 1 && data != null && data.getData() != null) {
-                imageUri = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    bitmap = rotateImageIfRequired(bitmap, imageUri);
-                    uploadedPic.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            // Image selected successfully, handle it here
+            Uri imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                bitmap = rotateImageIfRequired(bitmap, imageUri);
+                uploadedPic.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null) {
+            Bundle extras = data.getExtras();
+            if (extras != null && extras.containsKey("data")) {
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                if (imageBitmap != null) {
+                    // set captured image to ImageView
+                    uploadedPic.setImageBitmap(imageBitmap);
+                    // set capturedBitmap variable if needed
+                    capturedBitmap = imageBitmap;
+                    imageUri = null;
                 }
             }
         }

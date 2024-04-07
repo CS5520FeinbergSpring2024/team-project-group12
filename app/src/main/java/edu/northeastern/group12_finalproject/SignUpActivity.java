@@ -87,6 +87,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 reference.child(uid).setValue(hashmap);
 
                                 // Redirect to homepage.
+                                startActivity(new Intent(SignUpActivity.this, HomePageActivity.class));
                                 startActivity(new Intent(SignUpActivity.this, MainActivity.class));
                             } else {
                                 Toast.makeText(SignUpActivity.this, "Fail to signUp", Toast.LENGTH_SHORT).show();
