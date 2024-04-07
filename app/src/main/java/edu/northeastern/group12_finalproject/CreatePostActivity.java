@@ -222,7 +222,7 @@ public class CreatePostActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
             // Image selected successfully, handle it here
-            Uri imageUri = data.getData();
+            imageUri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 bitmap = rotateImageIfRequired(bitmap, imageUri);
