@@ -146,13 +146,12 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
     }
-    // Override oncreateoptionmenu for top tool bar.
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.profile_menu, menu);
-        return true;
-
-    }
+//    // Override oncreateoptionmenu for top tool bar.
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.profile_menu, menu);
+//        return true;
+//    }
 
     // method to open up home page activity
     // finished current activity to remove from backstack

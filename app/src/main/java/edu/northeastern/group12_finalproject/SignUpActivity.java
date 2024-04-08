@@ -68,19 +68,9 @@ public class SignUpActivity extends AppCompatActivity {
                                 String email = user.getEmail();
                                 String uid = user.getUid();
 
-                                // When user is registered store user info in firebase realtime.
-                                // Using HashMap.
-                                HashMap<Object, String> hashmap = new HashMap<>();
+                                Users newUser = new Users("Bio to be added...", "Unknown user", email, 0, 0, uid);
 
-                                // Put info in hashmap.
-                                hashmap.put("email", email);
-                                hashmap.put("uid", uid);
-                                // Following.
-                                hashmap.put("following", "0");
-                                // Followed.
-                                hashmap.put("followed", "0");
-                                hashmap.put("username", "Unknown User"); // To be added in Edit profile
-                                hashmap.put("bio", "Bio to be added..."); // To be added in Edit profile
+                                // When user is registered store user info in firebase realtime.
 
                                 // Firebase data base instance.
                                 FirebaseDatabase db = FirebaseDatabase.getInstance();
@@ -88,7 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 // Path to store user data named "Users"
                                 DatabaseReference reference = db.getReference("Users");
                                 // put data from hashmap to database.
-                                reference.child(uid).setValue(hashmap);
+                                reference.child(uid).setValue(newUser);
 
                                 // Redirect to homepage.
                                 startActivity(new Intent(SignUpActivity.this, EditProfileActivity.class));
