@@ -2,6 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="grey">#979797</color>
     <color name="Pistachio">#B2D3C2</color>
     <color name="pine">#234F1E</color>
     <color name="hunter_green">#3F704D</color>

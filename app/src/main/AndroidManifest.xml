@@ -18,6 +18,12 @@
         android:theme="@style/Theme.Group12_FinalProject"
         tools:targetApi="31">
         <activity
+            android:name=".SignOutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AccountSettingActivity"
+            android:exported="false" />
+        <activity
             android:name=".SignoutFragment"
             android:exported="false" />
         <activity

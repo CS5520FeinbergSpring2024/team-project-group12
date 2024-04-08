@@ -8,12 +8,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -121,16 +123,26 @@ public class ProfileActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar toolbar = (androidx.appcompat.widget.Toolbar) findViewById(R.id.profileToolBar);
         setSupportActionBar(toolbar);
 
-        toolbar.setOnMenuItemClickListener(new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
-            @SuppressLint("NonConstantResourceId")
+//        toolbar.setOnMenuItemClickListener(new androidx.appcompat.widget.Toolbar.OnMenuItemClickListener() {
+//            @SuppressLint("NonConstantResourceId")
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                Log.d(TAG, "onMenuItemClick: clicked menu item: " + item);
+//                int id = item.getItemId();
+//                if (id == R.id.profileMenu) {
+//                    Log.d(TAG, "onMenuItemClick: Navigating to Profile Preferences. ");
+//                }
+//                return false;
+//            }
+//        });
+
+        ImageView profileMenu = (ImageView) findViewById(R.id.profileMenu);
+        profileMenu.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                Log.d(TAG, "onMenuItemClick: clicked menu item: " + item);
-                int id = item.getItemId();
-                if (id == R.id.profileMenu) {
-                    Log.d(TAG, "onMenuItemClick: Navigating to Profile Preferences. ");
-                }
-                return false;
+            public void onClick(View v) {
+                Log.d(TAG, "onClick:navigating to account settings.");
+                Intent intent = new Intent(ProfileActivity.this, SignOutActivity.class);
+                startActivity(intent);
             }
         });
     }
