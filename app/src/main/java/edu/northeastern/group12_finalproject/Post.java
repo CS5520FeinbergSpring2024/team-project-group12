@@ -44,9 +44,18 @@ public class Post {
         this.username = username;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
+
     // Setter method for imageUrl
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
@@ -56,12 +65,24 @@ public class Post {
         return postTitle;
     }
 
+    public void setPostTitle(String postTitle) {
+        this.postTitle = postTitle;
+    }
+
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getActiveMinutes() {
+        return active_minutes;
+    }
+
+    public void setActiveMinutes() {
+        this.active_minutes = active_minutes;
     }
 
     public float getDistance() {
