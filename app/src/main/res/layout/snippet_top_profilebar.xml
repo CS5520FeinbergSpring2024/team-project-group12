@@ -30,7 +30,7 @@
                     android:layout_alignParentRight="true"
                     android:layout_marginEnd="20dp"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/ic_ellipsis"/>
+                    android:src="@drawable/ic_signout"/>
 
 
             </RelativeLayout>
