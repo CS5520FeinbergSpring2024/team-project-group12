@@ -9,16 +9,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +26,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -37,12 +36,15 @@ public class ProfileActivity extends AppCompatActivity {
     FirebaseAuth firebaseAuth;
     FirebaseUser user;
     FirebaseDatabase firebaseDatabase;
-    DatabaseReference databaseReference;
+    DatabaseReference usersDatabaseReference;
+    DatabaseReference postsDatabaseReference;
 
     TextView profileName;
     TextView displayNameTv;
     TextView bio;
     TextView editTv;
+
+    PostAdapter adapter;
 
     private ProgressBar progBar;
     private List<Post> posts;
@@ -52,19 +54,33 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        // Firebase initialization.
+        firebaseAuth = FirebaseAuth.getInstance();
+        user = firebaseAuth.getCurrentUser();
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
+
         RecyclerView recyclerView = findViewById(R.id.profileRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Set up adapter
-        PostAdapter adapter = new PostAdapter(posts);
-        recyclerView.setAdapter(adapter);
+        posts = new ArrayList<>();
+
 
 
         // Progress bar
         progBar = (ProgressBar) findViewById(R.id.profileProgressBar);
         progBar.setVisibility(View.GONE);
 
+        // Retrieve user information.
         retrieveFirebaseInfo();
+
+        // Retrieve user posts.
+        retrievePosts();
+
+
+        // Set up adapter
+        adapter = new PostAdapter(posts);
+        recyclerView.setAdapter(adapter);
 
         // Take you to edit profile page.
         editTv = findViewById(R.id.tvEditProfile);
@@ -144,19 +160,16 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Retrieve user info from firebase.
     private void retrieveFirebaseInfo() {
-        firebaseAuth = FirebaseAuth.getInstance();
-        user = firebaseAuth.getCurrentUser();
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference("Users");
+        usersDatabaseReference = firebaseDatabase.getReference("Users");
 
         // Initial View set up.
         profileName = findViewById(R.id.profileName);
         bio = findViewById(R.id.bio);
         displayNameTv = findViewById(R.id.display_name);
 
-        Query query = databaseReference.orderByChild("email").equalTo(user.getEmail());
+        Query userQuery = usersDatabaseReference.orderByChild("email").equalTo(user.getEmail());
 
-        query.addValueEventListener(new ValueEventListener() {
+        userQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Check until required data gets updated
@@ -170,7 +183,6 @@ public class ProfileActivity extends AppCompatActivity {
                     profileName.setText(email);
                     displayNameTv.setText(name);
                     bio.setText(bioData);
-
                 }
             }
 
@@ -179,6 +191,69 @@ public class ProfileActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    // Retrieve user posts.
+    private void retrievePosts() {
+        // Get reference to the posts database.
+        postsDatabaseReference = firebaseDatabase.getReference("posts");
+
+        // Use email as the identifier.
+        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(user.getEmail());
+        // Get one child.
+        postQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+                    String postId = dataSnapshot.child("postId").getValue(String.class);
+                    String userName = dataSnapshot.child("username").getValue(String.class);
+                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
+                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
+                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
+                    String description = dataSnapshot.child("description").getValue(String.class);
+
+                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+                    posts.add(newPost);
+                    adapter.notifyDataSetChanged();
+                    Log.d(TAG, "Data added");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+        // Update newly added posts to our posts list recycler view.
+        postQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+//                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
+                    String postId = dataSnapshot.child("postId").getValue(String.class);
+                    String userName = dataSnapshot.child("username").getValue(String.class);
+                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
+                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
+                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
+                    String description = dataSnapshot.child("description").getValue(String.class);
+                    Log.d(TAG, "Data added");
+                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+
+                    posts.add(newPost);
+                    adapter.notifyDataSetChanged();
+                    Log.d(TAG, "Data added");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
 }
