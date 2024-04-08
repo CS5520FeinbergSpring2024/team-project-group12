@@ -16,8 +16,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,7 +44,8 @@ import java.util.UUID;
 public class CreatePostActivity extends AppCompatActivity {
 
     // Initialize all user-input fields:
-    private EditText duration;
+    private NumberPicker hoursPicker;
+    private NumberPicker minutesPicker;
     private EditText distance;
     private EditText location;
     private EditText editTextTitle;
@@ -64,10 +67,12 @@ public class CreatePostActivity extends AppCompatActivity {
     private StorageReference storageRef;
     private DatabaseReference postsRef;
     // Permissions Constants
+    // Permissions Constants
     private static final int PERMISSION_REQUEST = 0;
-    private static final int REQUEST_IMAGE_FROM_GALLERY = 1;
-    private static final int PERMISSION_REQUEST_CAMERA = 2;
-    private static final int REQUEST_IMAGE_CAPTURE = 3;
+    private static final int PERMISSION_REQUEST_READ_MEDIA_IMAGES = 1;
+    private static final int REQUEST_PICK_IMAGE = 2;
+    private static final int PERMISSION_REQUEST_CAMERA = 3;
+    private static final int REQUEST_IMAGE_CAPTURE = 4;
 
 
     @Override
@@ -102,19 +107,40 @@ public class CreatePostActivity extends AppCompatActivity {
                 return false;
             }
         });
-        duration = findViewById(R.id.duration_edit_text);
+
+        // Initialize all user input fields
         distance = findViewById(R.id.distance_edit_text);
         editTextTitle = findViewById(R.id.post_title_edit_text);
         editTextDescription = findViewById(R.id.description_edit_text);
         location = findViewById(R.id.location_edit_text);
+        hoursPicker = findViewById(R.id.hoursPicker);
+        minutesPicker = findViewById(R.id.minutesPicker);
+
+        // set range for duration
+        hoursPicker.setMinValue(0);
+        hoursPicker.setMaxValue(24); // change this according to what we want to limit the user to
+        minutesPicker.setMinValue(0);
+        minutesPicker.setMaxValue(59);
+
+
 
         // changed the text on this button to say "Take Photo". This button calls the ImageUploadActivity to start a camera intent
         buttonAddImage = findViewById(R.id.add_photo_button);
         buttonAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // captureImageForPost();
-                startCameraIntent();
+                // Check camera permission before starting camera intent
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                    } else {
+                        // Permission already granted, start camera intent
+                        dispatchTakePictureIntent();
+                    }
+                } else {
+                    // For versions below Android M, start camera intent directly
+                    dispatchTakePictureIntent();
+                }
             }
         });
 
@@ -124,11 +150,11 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Request Permissions to access phone's image gallery:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST);
                 } else {
-                    // else permission already granted, open gallery to choose picture
+                    // Permission already granted or not required, open gallery to choose picture
                     selectImageFromGallery();
                 }
             }
@@ -162,25 +188,14 @@ public class CreatePostActivity extends AppCompatActivity {
         });
     }
 
-    private void startCameraIntent() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
-                return;
-            }
-        }
-        // if camera permission is granted, start camera intent
-        dispatchTakePictureIntent();
-    }
-
     // method to start camera intent
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        try {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        } else {
-            // This Toast appears on my emulator when I try to take picture with camera
-            Toast.makeText(this, "No camera app found", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error starting camera", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -203,30 +218,31 @@ public class CreatePostActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    dispatchTakePictureIntent();
-                } else {
-                    Toast.makeText(this, "Camera permission not granted", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case PERMISSION_REQUEST:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    selectImageFromGallery();
-                } else {
-                    Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
-                }
-                break;
+        Log.d("PermissionDebug", "Request Code: " + requestCode);
+        if (requestCode == PERMISSION_REQUEST_READ_MEDIA_IMAGES || requestCode == PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, launch gallery
+                selectImageFromGallery();
+            } else {
+                // Permission denied, show a message to the user
+                Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == PERMISSION_REQUEST_CAMERA) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, start camera intent
+                dispatchTakePictureIntent();
+            } else {
+                // Permission denied, show a message to the user
+                Toast.makeText(this, "Camera permission not granted", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     // Method to select picture from device's gallery
     private void selectImageFromGallery() {
-        Intent intent = new Intent();
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, REQUEST_PICK_IMAGE);
     }
 
 //    private void captureImageForPost() {
@@ -238,29 +254,26 @@ public class CreatePostActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                // Camera intent result
-                Bundle extras = data.getExtras();
-                if (extras != null && extras.containsKey("data")) {
-                    Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    if (imageBitmap != null) {
-                        // set captured image to ImageView
-                        uploadedPic.setImageBitmap(imageBitmap);
-                        // set capturedBitmap variable
-                        capturedBitmap = imageBitmap;
-                        // set imageUri to null because image captured by camera doesn't have uri
-                        imageUri = null;
-                    }
-                }
-            } else if (requestCode == 1 && data != null && data.getData() != null) {
-                imageUri = data.getData();
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    bitmap = rotateImageIfRequired(bitmap, imageUri);
-                    uploadedPic.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            // Image selected successfully, handle it here
+            imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                bitmap = rotateImageIfRequired(bitmap, imageUri);
+                uploadedPic.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null) {
+            Bundle extras = data.getExtras();
+            if (extras != null && extras.containsKey("data")) {
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                if (imageBitmap != null) {
+                    // set captured image to ImageView
+                    uploadedPic.setImageBitmap(imageBitmap);
+                    // set capturedBitmap variable if needed
+                    capturedBitmap = imageBitmap;
+                    imageUri = null;
                 }
             }
         }
@@ -303,36 +316,48 @@ public class CreatePostActivity extends AppCompatActivity {
      * This method takes user input into the fields of CreatePostActivity in order to instantiate a
      * Post object, which will be added to the database.
      */
-    private Post createPostFromUserInput(Uri imageUrl) {
+    private Post createPostFromUserInput() {
         // retrieve text from EditText fields
         String title = editTextTitle.getText().toString().trim();
         String description = editTextDescription.getText().toString().trim();
-        String durationText = duration.getText().toString().trim();
+        // change duration to be input with TimePicker widget rather than EditText
+        // retrieve selected values from NumberPicker widget
+        int selectedHours = hoursPicker.getValue();
+        int selectedMinutes = minutesPicker.getValue();
+
+        // calculate total duration in minutes
+        int totalDuration = (selectedHours * 60) + selectedMinutes;
+        // String totalDurationText = String.valueOf(totalDuration);
         String distanceText = distance.getText().toString().trim();
         String locationText = location.getText().toString().trim();
 
         // check if all required fields are filled (leave description and location as optional for now)
-        if (title.isEmpty() || description.isEmpty() || durationText.isEmpty() || distanceText.isEmpty() || locationText.isEmpty()) {
+        if (title.isEmpty() || description.isEmpty() || totalDuration <= 0 || distanceText.isEmpty() || locationText.isEmpty()) {
             return null; // return null if any required fields are empty
         }
 
         // convert duration and distance into appropriate data types
-        int postDuration = Integer.parseInt(durationText);
+        // int postDuration = Integer.parseInt(totalDurationText);
         float postDistance = Float.parseFloat(distanceText);
 
         // create and return Post object
-        return new Post("postId", "username", System.currentTimeMillis(), imageUrl != null ? imageUrl.toString() : null, title, description, postDuration, postDistance);    }
+        return new Post("postId", "username", System.currentTimeMillis(), null, title, description, totalDuration, postDistance);  }
 
     /**
      * This logic takes the image that is in the ImageView and adds it to Firebase Storage, as well
      * as adds it to the Realtime Database when all fields of the Post Object are successfully filled out.
      * Upon successful addition to the database, the user is navigated back to the MainFeed.
+     *
+     * PROBLEM: when image captured from the camera, it is added to Realtime DB without imageURI.
+     * Need to somehow extract the Uri from Firebase Storage by doing something like this:
+     * StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("images/" + filename);
+     * Rather than letting imageUri = null
      */
     private void uploadPostToDatabase() {
         // show progress bar when image is being uploaded to DB
         pb.setVisibility(View.VISIBLE);
         // added:
-        Post post = createPostFromUserInput(imageUri);
+        Post post = createPostFromUserInput();
 
         // handle potential null
         if (post == null) {
@@ -358,9 +383,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         String imageUrl = uri.toString();
-                                        // create new Post object with image
-                                        // Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
-
+                                        post.setImageUrl(imageUrl);
                                         // get reference to Realtime DB
                                         appDB = FirebaseDatabase.getInstance();
                                         postsRef = appDB.getReference().child("posts");
@@ -422,9 +445,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Uri uri) {
                                 String imageUrl = uri.toString();
-                                // create new Post object with image
-                                // Post post = new Post("postId", "username", System.currentTimeMillis(), imageUrl, "postTitle", "description", 0, 0.0f);
-
+                                post.setImageUrl(imageUrl);
                                 // get reference to Realtime DB
                                 appDB = FirebaseDatabase.getInstance();
                                 postsRef = appDB.getReference().child("posts");
@@ -471,6 +492,7 @@ public class CreatePostActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
         }
     }
+
 
 
     private void showToast(String message) {

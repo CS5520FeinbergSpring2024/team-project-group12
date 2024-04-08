@@ -35,6 +35,17 @@
                 android:minHeight="48dp" />
 
             <EditText
+                android:id="@+id/description_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:hint="Enter Description Here"
+                android:inputType="textMultiLine"
+                android:minLines="3" />
+
+            <EditText
                 android:id="@+id/post_title_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -45,16 +56,49 @@
                 android:inputType="text"
                 android:minHeight="48dp" />
 
-            <EditText
-                android:id="@+id/duration_edit_text"
+            <!-- instead of EditText field for duration,
+                use a TimePicker. Create a button for this-->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:hint="Duration - HH:MM:SS"
-                android:inputType="number"
-                android:minHeight="48dp" />
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="8dp">
+
+                <NumberPicker
+                    android:id="@+id/hoursPicker"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:value="0"
+                    android:scaleY="0.8"
+                    android:scaleX="0.8"/>
+
+                <NumberPicker
+                    android:id="@+id/minutesPicker"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:value="0"
+                    android:scaleY="0.8"
+                    android:scaleX="0.8"/>
+
+
+            </LinearLayout>
+
+<!--            <Button-->
+<!--                android:id="@+id/duration_button"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginStart="16dp"-->
+<!--                android:layout_marginTop="8dp"-->
+<!--                android:layout_marginEnd="16dp"-->
+<!--                android:backgroundTint="@color/Pistachio"-->
+<!--                android:contentDescription="Duration"-->
+<!--                android:text="Duration"-->
+<!--                android:textColor="@android:color/black" />-->
+
 
             <EditText
                 android:id="@+id/distance_edit_text"
@@ -77,17 +121,6 @@
                 android:hint="Location - Boston, MA"
                 android:minHeight="48dp" />
 
-            <EditText
-                android:id="@+id/description_edit_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:hint="Enter Description Here"
-                android:inputType="textMultiLine"
-                android:minLines="3" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -101,7 +134,9 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:text="Upload Photo" />
+                    android:text="Upload Photo"
+                    android:backgroundTint="@color/Pistachio"
+                    android:textColor="@android:color/black"/>
 
                 <Button
                     android:id="@+id/add_photo_button"
@@ -111,7 +146,9 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:text="Take Photo" />
+                    android:text="Take Photo"
+                    android:backgroundTint="@color/Pistachio"
+                    android:textColor="@android:color/black"/>
 
             </LinearLayout>
 
