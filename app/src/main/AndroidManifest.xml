@@ -24,6 +24,9 @@
             android:name=".AccountSettingActivity"
             android:exported="false" />
         <activity
+            android:name=".SearchActivity"
+            android:exported="false" />
+        <activity
             android:name=".SignoutFragment"
             android:exported="false" />
         <activity
