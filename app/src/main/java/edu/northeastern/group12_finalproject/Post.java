@@ -1,5 +1,8 @@
 package edu.northeastern.group12_finalproject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Post {
 
     private String postId; // unique identifier for Post in database
@@ -10,10 +13,13 @@ public class Post {
     private String description;
     private int active_minutes;
     private float distance;
+    private int likes;
+    private List<String> comments;
+
 
     // constructor
     public Post() {
-
+        this.comments = new ArrayList<>();
     }
     // Constructor with imageUrl parameter
     public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
@@ -25,6 +31,8 @@ public class Post {
         this.description = description;
         this.active_minutes = active_minutes;
         this.distance = distance;
+        this.likes = 0;
+
     }
 
     // getters and setters
@@ -91,6 +99,32 @@ public class Post {
 
     public void setDistance(float distance) {
         this.distance = distance;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public List<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<String> comments) {
+        this.comments = comments;
+    }
+
+    // Utility methods to add likes and comments
+
+    public void addLikes() {
+        this.likes++;
+    }
+
+    public void addComment(String comment) {
+        this.comments.add(comment);
     }
 
 }
