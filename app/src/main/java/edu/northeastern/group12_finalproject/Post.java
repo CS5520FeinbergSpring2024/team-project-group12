@@ -19,8 +19,8 @@ public class Post {
 
     // constructor
     public Post() {
-        this.likes = 0;
-        this.comments = new ArrayList<>(); // initialize comments as empty array
+        //this.likes = 0;
+        //this.comments = new ArrayList<>(); // initialize comments as empty array
     }
     // Constructor with imageUrl parameter
     public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
@@ -32,8 +32,11 @@ public class Post {
         this.description = description;
         this.active_minutes = active_minutes;
         this.distance = distance;
-        //this.likes = 0;
-        //this.comments = new ArrayList<>(); // Initialize comments as an empty list if comments is null
+        this.likes = 0;
+        // note: when initialized as an empty array, the comments field doesnt show up in Realtime DB.
+        // But adding a comment upon initialization includes comments field in the DB correctly
+        this.comments = new ArrayList<>(); // Initialize comments as an empty list if comments is null
+        // this.comments.add("This is a sample comment.");
 
 
     }
