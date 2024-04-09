@@ -297,25 +297,68 @@ public class CreatePostActivity extends AppCompatActivity {
     /**
      * This method takes user input into the fields of CreatePostActivity in order to instantiate a
      * Post object, which will be added to the database.
+     * This method includes all data validations to ensure that user input follows certain rules/restrictions.
+     * If any of the input is invalid, the User will see a Snackbar prompting them to try again.
      */
     private Post createPostFromUserInput() {
         // retrieve text from EditText fields
         String title = editTextTitle.getText().toString().trim();
         String description = editTextDescription.getText().toString().trim();
-        // change duration to be input with TimePicker widget rather than EditText
+
+        // check if title exceeds maximum length or empty
+        if (title.isEmpty() || title.length() > 100) {
+            // show error message
+            Snackbar.make(findViewById(android.R.id.content), "Post must have a title and it should be less than 100 characters", Snackbar.LENGTH_LONG).show();
+            return null;
+        }
+
+        // check if description exceeds maximum length or empty
+        if (description.isEmpty() || description.length() > 300) {
+            // show error message
+            Snackbar.make(findViewById(android.R.id.content), "Post must have a description and it should be less than 300 characters", Snackbar.LENGTH_LONG).show();
+            return null;
+        }
+
         // retrieve selected values from NumberPicker widget
         int selectedHours = hoursPicker.getValue();
         int selectedMinutes = minutesPicker.getValue();
 
         // calculate total duration in minutes
         int totalDuration = (selectedHours * 60) + selectedMinutes;
+
+        // check if total duration is valid
+        if (totalDuration <= 0) {
+            // show error message in a Snackbar
+            Snackbar.make(findViewById(android.R.id.content), "Don't forget to log your active minutes!", Snackbar.LENGTH_LONG).show();
+            return null;
+        }
+
         // String totalDurationText = String.valueOf(totalDuration);
         String distanceText = distance.getText().toString().trim();
+
+
+        if (distanceText.isEmpty()) {
+            // show error message in a Snackbar
+            Snackbar.make(findViewById(android.R.id.content), "Don't forget to log your distance! Just put 0 if you took a rest day! No shame!", Snackbar.LENGTH_LONG).show();
+            return null;
+        }
+
+        // Check if distance is a valid float
+        float postDistance;
+        try {
+            postDistance = Float.parseFloat(distanceText);
+        } catch (NumberFormatException e) {
+            // Show error message
+            return null;
+        }
+
+        // design Q: should location be mandatory? Or should we change this to just have it be empty if not given?
         String locationText = location.getText().toString().trim();
 
-        // check if all required fields are filled (leave description and location as optional for now)
-        if (title.isEmpty() || description.isEmpty() || totalDuration <= 0 || distanceText.isEmpty() || locationText.isEmpty()) {
-            return null; // return null if any required fields are empty
+        if (locationText.isEmpty() || locationText.length() > 50) {
+            // show error message
+            Snackbar.make(findViewById(android.R.id.content), "Please enter a valid location, shorter than 50 characters.", Snackbar.LENGTH_LONG).show();
+            return null;
         }
 
         // get username of user who posts:
@@ -323,10 +366,6 @@ public class CreatePostActivity extends AppCompatActivity {
         FirebaseUser user = auth.getCurrentUser();
         // temporarily use email instead of Username, because Profile set up not yet implemented
         String username = user.getEmail();
-
-        // convert duration and distance into appropriate data types
-        // int postDuration = Integer.parseInt(totalDurationText);
-        float postDistance = Float.parseFloat(distanceText);
 
         // create and return Post object
         return new Post("postId", username, System.currentTimeMillis(), null, title, description, totalDuration, postDistance);
@@ -345,10 +384,18 @@ public class CreatePostActivity extends AppCompatActivity {
 
         // handle potential null
         if (post == null) {
-            // notify user and return
-            Toast.makeText(CreatePostActivity.this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
+            // notify user and return (now being handled in createPostFromUserInput()
+            // Toast.makeText(CreatePostActivity.this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
             pb.setVisibility(View.INVISIBLE);
             return;
+        }
+
+        // if image null, prompt user to select an image for the Post
+        if (imageUri == null && capturedBitmap == null) {
+            // hide progress bar if no image selected
+            pb.setVisibility(View.INVISIBLE);
+            Snackbar.make(findViewById(android.R.id.content), "Don't forget to include an image in your post! \nShow your followers what you're up to!", Snackbar.LENGTH_LONG).show();
+
         }
 
         if (imageUri != null || capturedBitmap != null) {
@@ -473,7 +520,6 @@ public class CreatePostActivity extends AppCompatActivity {
         } else {
             // Hide progress bar if no image selected
             pb.setVisibility(View.INVISIBLE);
-            Toast.makeText(getApplicationContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
         }
     }
 
