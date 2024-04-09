@@ -2,6 +2,7 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -57,7 +58,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@null"
-                android:src="@drawable/baseline_more_horiz_24" />
+                android:src="@drawable/baseline_more_horiz_24"
+                tools:ignore="TouchTargetSizeCheck" />
 
         </LinearLayout>
 
@@ -70,6 +72,18 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/active_minutes_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Active Minutes" />
+
+        <TextView
+            android:id="@+id/distance_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance" />
+
+        <TextView
             android:id="@+id/descript"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -80,6 +94,8 @@
             android:id="@+id/image_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
             android:background="@color/white"
             android:src="@drawable/ic_launcher_group12_foreground"/>
 
