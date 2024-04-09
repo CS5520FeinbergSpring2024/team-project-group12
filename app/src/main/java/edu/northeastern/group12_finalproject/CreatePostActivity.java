@@ -30,6 +30,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -199,21 +201,6 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-    // show Toast if Gallery permissions not granted
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        switch (requestCode) {
-//            case PERMISSION_REQUEST:
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    selectImageFromGallery(); // Call method to select image after permission is granted
-//                } else {
-//                    Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_LONG).show();
-//                }
-//                break;
-//        }
-//    }
-
     // Show message if permissions not granted
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -331,22 +318,24 @@ public class CreatePostActivity extends AppCompatActivity {
             return null; // return null if any required fields are empty
         }
 
+        // get username of user who posts:
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        // temporarily use email instead of Username, because Profile set up not yet implemented
+        String username = user.getEmail();
+
         // convert duration and distance into appropriate data types
         // int postDuration = Integer.parseInt(totalDurationText);
         float postDistance = Float.parseFloat(distanceText);
 
         // create and return Post object
-        return new Post("postId", "username", System.currentTimeMillis(), null, title, description, totalDuration, postDistance);  }
+        return new Post("postId", username, System.currentTimeMillis(), null, title, description, totalDuration, postDistance);
+    }
 
     /**
      * This logic takes the image that is in the ImageView and adds it to Firebase Storage, as well
      * as adds it to the Realtime Database when all fields of the Post Object are successfully filled out.
      * Upon successful addition to the database, the user is navigated back to the MainFeed.
-     *
-     * PROBLEM: when image captured from the camera, it is added to Realtime DB without imageURI.
-     * Need to somehow extract the Uri from Firebase Storage by doing something like this:
-     * StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("images/" + filename);
-     * Rather than letting imageUri = null
      */
     private void uploadPostToDatabase() {
         // show progress bar when image is being uploaded to DB
@@ -514,13 +503,4 @@ public class CreatePostActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-
-    /**
-     * To do still:
-     * - initialize each post with 0 likes, 0 comments
-     * - input validations
-     *      - title <= 20 characters
-     *      - distance: float
-     *      - duration: int,
-     */
 }
