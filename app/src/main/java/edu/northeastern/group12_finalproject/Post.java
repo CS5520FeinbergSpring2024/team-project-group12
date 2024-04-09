@@ -19,7 +19,8 @@ public class Post {
 
     // constructor
     public Post() {
-        this.comments = new ArrayList<>();
+        this.likes = 0;
+        this.comments = new ArrayList<>(); // initialize comments as empty array
     }
     // Constructor with imageUrl parameter
     public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
@@ -31,7 +32,9 @@ public class Post {
         this.description = description;
         this.active_minutes = active_minutes;
         this.distance = distance;
-        this.likes = 0;
+        //this.likes = 0;
+        //this.comments = new ArrayList<>(); // Initialize comments as an empty list if comments is null
+
 
     }
 
