@@ -1,6 +1,10 @@
 package edu.northeastern.group12_finalproject;
 
+import android.icu.text.DateFormat;
+
+import java.text.DateFormatSymbols;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class Post {
@@ -133,4 +137,31 @@ public class Post {
         this.comments.add(comment);
     }
 
+    public String getTimestampDifference() {
+        long now = System.currentTimeMillis();
+        long difference = Math.abs(now - timestamp) / 1000; // Difference in seconds
+
+        if (difference < 60) {
+            return difference + " seconds ago";
+        } else if (difference < 60 * 60) {
+            long minutes = difference / 60;
+            return minutes + " minutes ago";
+        } else if (difference < 60 * 60 * 24) {
+            long hours = difference / (60 * 60);
+            return hours + " hours ago";
+        } else if (difference < 60 * 60 * 24 * 365) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timestamp);
+            return calendar.get(Calendar.DAY_OF_MONTH) + " " +
+                    new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)] + " at " +
+                    DateFormat.getTimeInstance().format(calendar.getTime());
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timestamp);
+            return calendar.get(Calendar.DAY_OF_MONTH) + " " +
+                    new DateFormatSymbols().getMonths()[calendar.get(Calendar.MONTH)] + ", " +
+                    calendar.get(Calendar.YEAR) + " at " +
+                    DateFormat.getTimeInstance().format(calendar.getTime());
+        }
+    }
 }

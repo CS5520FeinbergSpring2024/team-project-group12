@@ -39,6 +39,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.activeMinutesTextView.setText("Active Minutes: " + String.valueOf(post.getActiveMinutes()));
         holder.distanceTextView.setText("Total Distance: " + String.valueOf(post.getDistance()));
         holder.likesTextView.setText(String.valueOf(post.getLikes()) + " likes");
+        holder.timestamp.setText(post.getTimestampDifference());
 
         // Check if comments list is not null before accessing its size
         if (post.getComments() != null) {
@@ -67,6 +68,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         TextView likesTextView;
         TextView commentsTextView;
         ImageView postImage;
+        TextView timestamp;
 
 
         PostViewHolder(@NonNull View itemView) {
@@ -79,6 +81,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             likesTextView = itemView.findViewById(R.id.like_count);
             commentsTextView = itemView.findViewById(R.id.comment_count);
             postImage = itemView.findViewById(R.id.image_view);
+            timestamp = itemView.findViewById(R.id.time_text_view);
 
         }
     }
