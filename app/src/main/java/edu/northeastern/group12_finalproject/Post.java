@@ -18,7 +18,8 @@ public class Post {
     private int active_minutes;
     private float distance;
     private int likes;
-    private List<String> comments;
+    private List<Comment> comments;
+    private boolean liked;
 
 
     // constructor
@@ -115,26 +116,28 @@ public class Post {
         return likes;
     }
 
-    public void setLikes(int likes) {
-        this.likes = likes;
+    public void incrementLikes() {
+        likes++;
     }
 
-    public List<String> getComments() {
+    public void decrementLikes() {
+        likes--;
+    }
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
+    }
+
+    public List<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<String> comments) {
-        this.comments = comments;
+    public boolean isLiked() {
+        return liked;
     }
 
-    // Utility methods to add likes and comments
-
-    public void addLikes() {
-        this.likes++;
-    }
-
-    public void addComment(String comment) {
-        this.comments.add(comment);
+    public void setLiked(boolean liked) {
+        this.liked = liked;
     }
 
     public String getTimestampDifference() {

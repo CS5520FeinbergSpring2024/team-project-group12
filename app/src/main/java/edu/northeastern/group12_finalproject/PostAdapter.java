@@ -3,6 +3,7 @@ package edu.northeastern.group12_finalproject;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -52,6 +53,30 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         Picasso.get()
                 .load(post.getImageUrl())
                 .into(holder.postImage);
+
+        // Set up like button onClickListener
+        holder.likeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Implement like functionality here
+                if (post.isLiked()) {
+                    post.decrementLikes();
+                } else {
+                    post.incrementLikes();
+                }
+                holder.likesTextView.setText(String.valueOf(post.getLikes()) + " likes");
+                post.setLiked(!post.isLiked());
+            }
+        });
+
+        // Set up comment button onClickListener
+        holder.commentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Implement comment functionality here
+                // Open a new activity or fragment to handle comments
+            }
+        });
     }
 
     @Override
@@ -69,6 +94,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         TextView commentsTextView;
         ImageView postImage;
         TextView timestamp;
+        Button likeButton;
+        Button commentButton;
 
 
         PostViewHolder(@NonNull View itemView) {
@@ -82,6 +109,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             commentsTextView = itemView.findViewById(R.id.comment_count);
             postImage = itemView.findViewById(R.id.image_view);
             timestamp = itemView.findViewById(R.id.time_text_view);
+
+            likeButton = itemView.findViewById(R.id.like);
+            commentButton = itemView.findViewById(R.id.comment);
 
         }
     }
