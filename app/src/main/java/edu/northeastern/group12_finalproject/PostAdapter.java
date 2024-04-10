@@ -12,6 +12,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 
@@ -67,13 +72,37 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             @Override
             public void onClick(View view) {
                 // Implement like functionality here
-                if (post.isLiked()) {
-                    post.decrementLikes();
-                } else {
-                    post.incrementLikes();
-                }
-                holder.likesTextView.setText(String.valueOf(post.getLikes()) + " likes");
-                post.setLiked(!post.isLiked());
+                DatabaseReference postRef = FirebaseDatabase.getInstance().getReference().child("posts").child(post.getPostId());
+
+                postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            Post firebasePost = snapshot.getValue(Post.class);
+                            if (firebasePost != null) {
+                                if (firebasePost.isLiked()) {
+                                    // Unlike the post
+                                    firebasePost.setLiked(false);
+                                    firebasePost.decrementLikes();
+                                } else {
+                                    // Like the post
+                                    firebasePost.setLiked(true);
+                                    firebasePost.incrementLikes();
+                                }
+                                // Update like count and like status in Firebase
+                                postRef.child("likes").setValue(firebasePost.getLikes());
+                                postRef.child("liked").setValue(firebasePost.isLiked());
+                                // Update local UI
+                                holder.likesTextView.setText(String.valueOf(firebasePost.getLikes()) + " likes");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("PostAdapter", "Error fetching post data from Firebase: " + error.getMessage());
+                    }
+                });
             }
         });
 
