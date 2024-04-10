@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -98,57 +99,47 @@
             android:background="@color/white"
             android:src="@drawable/ic_launcher_group12_foreground"/>
 
-        <!-- Wrap RecyclerView and Add button inside a NestedScrollView -->
-        <androidx.core.widget.NestedScrollView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/commentsRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content" />
 
-            <LinearLayout
+        <!-- Comment Input -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/commentInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxBackgroundColor="@color/white"
+            app:boxBackgroundMode="filled"
+            app:boxCornerRadiusBottomEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxStrokeColor="@color/black"
+            app:boxStrokeWidth="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/commentsRecyclerView"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/commentInputEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:hint="Add a comment"
+                android:inputType="text" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/commentsRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/commentInputLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:boxBackgroundColor="@color/white"
-                    app:boxBackgroundMode="filled"
-                    app:boxCornerRadiusBottomEnd="8dp"
-                    app:boxCornerRadiusBottomStart="8dp"
-                    app:boxCornerRadiusTopEnd="8dp"
-                    app:boxCornerRadiusTopStart="8dp"
-                    app:boxStrokeColor="@color/black"
-                    app:boxStrokeWidth="1dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/commentsRecyclerView"
-                    android:layout_marginTop="8dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/commentInputEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Add a comment"
-                        android:inputType="text" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Button
-                    android:id="@+id/addCommentButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Add" />
-
-            </LinearLayout>
-
-        </androidx.core.widget.NestedScrollView>
+        <Button
+            android:id="@+id/addCommentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/commentInputLayout"
+            android:layout_marginTop="8dp"/>
 
     </LinearLayout>
 

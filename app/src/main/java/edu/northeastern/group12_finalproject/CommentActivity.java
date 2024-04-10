@@ -77,7 +77,7 @@ public class CommentActivity extends AppCompatActivity {
         String imageUrl = intent.getStringExtra("imageUrl");
         String username = intent.getStringExtra("username");
         int activeMinutes = intent.getIntExtra("activeMinutes", 0);
-        float distance = intent.getFloatExtra("distance", 0.0f);
+        int distance = intent.getIntExtra("distance", 0);
         long postTimestamp = intent.getLongExtra("timestamp", 0);
         comments = intent.getParcelableArrayListExtra("comments");
         if (comments == null) {
@@ -215,13 +215,7 @@ public class CommentActivity extends AppCompatActivity {
             }
         });
     }
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish(); // Finish the CommentActivity
-        // Start MainActivity again
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-    }
+
+
 
 }

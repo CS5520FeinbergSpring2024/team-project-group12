@@ -18,7 +18,7 @@ public class Post {
     private String imageUrl;
     private String postTitle;
     private String description;
-    private int activeMinutes;
+    private int active_minutes;
     private float distance;
     private int likes;
     private HashMap<String, Comment> comments;
@@ -31,14 +31,14 @@ public class Post {
         //this.comments = new ArrayList<>(); // initialize comments as empty array
     }
     // Constructor with imageUrl parameter
-    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int activeMinutes, float distance) {
+    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
         this.postId = postId;
         this.username = username;
         this.timestamp = timestamp;
         this.imageUrl = imageUrl;
         this.postTitle = postTitle;
         this.description = description;
-        this.activeMinutes = activeMinutes;
+        this.active_minutes = active_minutes;
         this.distance = distance;
         this.likes = 0;
         // note: when initialized as an empty array, the comments field doesnt show up in Realtime DB.
@@ -97,11 +97,11 @@ public class Post {
     }
 
     public int getActiveMinutes() {
-        return activeMinutes;
+        return active_minutes;
     }
 
     public void setActiveMinutes() {
-        this.activeMinutes = activeMinutes;
+        this.active_minutes = active_minutes;
     }
 
     public float getDistance() {
