@@ -1,5 +1,6 @@
 package edu.northeastern.group12_finalproject;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
@@ -73,8 +75,24 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Implement comment functionality here
-                // Open a new activity or fragment to handle comments
+                Intent intent = new Intent(view.getContext(), CommentActivity.class);
+                // Pass necessary data to the intent (postId, postTitle, imageUrl, comments)
+                intent.putExtra("postId", post.getPostId());
+                intent.putExtra("postTitle", post.getPostTitle());
+                intent.putExtra("description", post.getDescription());
+                intent.putExtra("imageUrl", post.getImageUrl());
+                intent.putExtra("username", post.getUsername());
+                intent.putExtra("activeMinutes", post.getActiveMinutes());
+                intent.putExtra("distance", post.getDistance());
+                intent.putExtra("timestamp", post.getTimestamp());
+                // Convert the list of comments to Serializable or Parcelable and pass it to the intent
+                List<Comment> comments = post.getComments();
+                if (comments == null) {
+                    comments = new ArrayList<>();
+                }
+                intent.putParcelableArrayListExtra("comments", new ArrayList<>(comments));
+                // Start the activity
+                view.getContext().startActivity(intent);
             }
         });
     }
