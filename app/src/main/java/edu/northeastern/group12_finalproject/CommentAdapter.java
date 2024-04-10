@@ -44,6 +44,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         return commentList != null ? commentList.size() : 0;
     }
 
+    public void updateComments(List<Comment> newCommentList) {
+        commentList.clear();
+        commentList.addAll(newCommentList);
+        notifyDataSetChanged();
+    }
+
     static class CommentViewHolder extends RecyclerView.ViewHolder {
         TextView usernameTextView;
         TextView timestampTextView;

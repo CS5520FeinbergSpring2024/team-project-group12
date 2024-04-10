@@ -1,5 +1,7 @@
 package edu.northeastern.group12_finalproject;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +33,7 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -47,6 +50,7 @@ public class CommentActivity extends AppCompatActivity {
     EditText newCommentEditText;
     private Post post;
     private List<Comment> comments = new ArrayList<>();
+    private CommentAdapter commentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +85,7 @@ public class CommentActivity extends AppCompatActivity {
         }
         // Set up recycler view
         RecyclerView commentsRecyclerView = findViewById(R.id.commentsRecyclerView);
-        CommentAdapter commentAdapter = new CommentAdapter(comments);
+        commentAdapter = new CommentAdapter(comments);
         commentsRecyclerView.setAdapter(commentAdapter);
         commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -111,17 +115,39 @@ public class CommentActivity extends AppCompatActivity {
                     FirebaseUser user = auth.getCurrentUser();
                     String username = user.getEmail(); // Use email as username for now
                     long timestamp = System.currentTimeMillis(); // Current timestamp
-                    Comment newComment = new Comment(username, timestamp, newCommentText);
-                    retrievePostFromDatabase(postId, newComment);
-
-                    // Add the new comment to the list of comments
-                    comments.add(newComment);
-
-                    // Notify the adapter that the dataset has changed
-                    commentAdapter.notifyDataSetChanged();
-
-                    // Clear the EditText after adding the comment
-                    newCommentEditText.getText().clear();
+                    String commentId = FirebaseDatabase.getInstance().getReference("posts")
+                            .child(postId)
+                            .child("comments")
+                            .push()
+                            .getKey();
+                    Comment newComment = new Comment(commentId, username, timestamp, newCommentText);
+                    // Update the Firebase database with the new comment
+                    DatabaseReference commentsRef = FirebaseDatabase.getInstance()
+                            .getReference("posts")
+                            .child(postId)
+                            .child("comments")
+                            .child(commentId); // Reference to the comment using its id
+                    commentsRef.setValue(newComment)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "New comment added to database");
+                                    // Add the new comment locally to the list of comments
+                                    comments.add(newComment);
+                                    // Notify the adapter that the dataset has changed
+                                    commentAdapter.notifyDataSetChanged();
+                                    // Clear the EditText after adding the comment
+                                    newCommentEditText.getText().clear();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e(TAG, "Failed to add comment to database", e);
+                                    // Handle failure to add comment to database
+                                }
+                            });
+                    retrievePostFromDatabase(postId);
                 }
             }
         });
@@ -158,54 +184,38 @@ public class CommentActivity extends AppCompatActivity {
         }
     }
 
-    private void retrievePostFromDatabase(String postId, Comment newComment) {
+    private void retrievePostFromDatabase(String postId) {
         DatabaseReference postRef = FirebaseDatabase.getInstance().getReference("posts").child(postId);
-        Log.d("RetrievePost", "Retrieving post from the database for postId: " + postId);
-        Log.d("RetrievePost", "Retrieving post from the database...");
         postRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     Log.d("RetrievePost", "Post with the given postId exists in the database");
-                    // Post with the given postId exists in the database
+                    // Retrieve the post object
                     Post post = dataSnapshot.getValue(Post.class);
-                    // Now you have the Post object, you can add the new comment to it
                     if (post != null) {
-                        // Add the new comment locally to the Post object
-                        post.addComment(newComment);
-                        // Update the database to reflect the addition of the new comment
-                        DatabaseReference commentsRef = postRef.child("comments").push();
-                        commentsRef.setValue(newComment)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.d("RetrievePost", "Comment added successfully");
-                                        // Comment added successfully
-                                        // You may want to notify the user or perform any other actions here
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.d("RetrievePost", "Failed to add comment: " + e.getMessage());
-                                        // Failed to add comment
-                                        // You may want to notify the user or perform any other actions here
-                                    }
-                                });
+                        // Retrieve the comments for the post
+                        HashMap<String, Comment> commentsMap = post.getComments();
+                        if (commentsMap != null && !commentsMap.isEmpty()) {
+                            List<Comment> comments = new ArrayList<>(commentsMap.values());
+                            // Update the adapter with the new list of comments
+                            commentAdapter.updateComments(comments);
+                        } else {
+                            Log.d("RetrievePost", "No comments found for the post");
+                        }
                     }
                 } else {
                     Log.d("RetrievePost", "Post with the given postId does not exist");
-                    // Post with the given postId does not exist
-                    // You may want to handle this case accordingly
                 }
             }
 
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // error handling
+                // Handle error
             }
         });
     }
+
+
 
 }

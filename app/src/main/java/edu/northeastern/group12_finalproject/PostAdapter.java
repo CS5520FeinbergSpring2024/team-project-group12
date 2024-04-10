@@ -16,7 +16,11 @@ import com.squareup.picasso.Picasso;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
@@ -90,12 +94,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 intent.putExtra("activeMinutes", post.getActiveMinutes());
                 intent.putExtra("distance", post.getDistance());
                 intent.putExtra("timestamp", post.getTimestamp());
-                // Convert the list of comments to Serializable or Parcelable and pass it to the intent
-                List<Comment> comments = post.getComments();
-                if (comments == null) {
-                    comments = new ArrayList<>();
+                // Get the comments HashMap
+                HashMap<String, Comment> commentsMap = post.getComments();
+                if (commentsMap != null && !commentsMap.isEmpty()) {
+                    intent.putParcelableArrayListExtra("comments", new ArrayList<>(commentsMap.values()));
+                } else {
+                    intent.putParcelableArrayListExtra("comments", new ArrayList<>());
                 }
-                intent.putParcelableArrayListExtra("comments", new ArrayList<>(comments));
                 // Start the activity
                 view.getContext().startActivity(intent);
             }

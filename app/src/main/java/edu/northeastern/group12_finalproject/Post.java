@@ -5,6 +5,9 @@ import android.icu.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class Post {
@@ -18,7 +21,7 @@ public class Post {
     private int active_minutes;
     private float distance;
     private int likes;
-    private List<Comment> comments;
+    private HashMap<String, Comment> comments;
     private boolean liked;
 
 
@@ -40,7 +43,7 @@ public class Post {
         this.likes = 0;
         // note: when initialized as an empty array, the comments field doesnt show up in Realtime DB.
         // But adding a comment upon initialization includes comments field in the DB correctly
-        this.comments = new ArrayList<>(); // Initialize comments as an empty list if comments is null
+        this.comments = new HashMap<>(); // Initialize comments as an empty list if comments is null
     }
 
     // getters and setters
@@ -123,12 +126,13 @@ public class Post {
 
     public void addComment(Comment comment) {
         if (comments == null) {
-            comments = new ArrayList<>(); // Initialize comments list if null
+            comments = new HashMap<>(); // Initialize comments HashMap if null
         }
-        comments.add(comment);
+        // Add the comment to the HashMap using its ID as the key
+        comments.put(comment.getId(), comment);
     }
 
-    public List<Comment> getComments() {
+    public HashMap<String, Comment> getComments() {
         return comments;
     }
 

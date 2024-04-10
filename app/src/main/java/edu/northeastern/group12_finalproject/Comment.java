@@ -9,6 +9,7 @@ import java.util.Locale;
 
 public class Comment implements Parcelable {
 
+    private String id;
     private String username;
     private long timestamp;
     private String text;
@@ -18,7 +19,8 @@ public class Comment implements Parcelable {
     }
 
     // Constructor
-    public Comment(String username, long timestamp, String text) {
+    public Comment(String id, String username, long timestamp, String text) {
+        this.id = id;
         this.username = username;
         this.timestamp = timestamp;
         this.text = text;
@@ -26,6 +28,7 @@ public class Comment implements Parcelable {
 
     // Parcelable implementation
     protected Comment(Parcel in) {
+        id = in.readString();
         username = in.readString();
         timestamp = in.readLong();
         text = in.readString();
@@ -50,12 +53,21 @@ public class Comment implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
         parcel.writeString(username);
         parcel.writeLong(timestamp);
         parcel.writeString(text);
     }
 
     // Getters and setters
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getUsername() {
         return username;
     }
