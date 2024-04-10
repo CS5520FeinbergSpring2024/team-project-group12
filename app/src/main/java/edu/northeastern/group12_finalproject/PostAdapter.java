@@ -1,6 +1,7 @@
 package edu.northeastern.group12_finalproject;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,19 +36,24 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         Post post = postList.get(position);
+        Log.d("PostAdapter", "Post at position " + position + " loaded: " + post.getPostTitle());
+
         holder.titleTextView.setText(post.getPostTitle());
         holder.descriptionTextView.setText(post.getDescription());
         holder.usernameTextView.setText(post.getUsername());
-        holder.activeMinutesTextView.setText("Active Minutes: " + String.valueOf(post.getActiveMinutes()));
+        int activeMinutes = post.getActiveMinutes();
+        holder.activeMinutesTextView.setText("Active Minutes: " + String.valueOf(activeMinutes));
         holder.distanceTextView.setText("Total Distance: " + String.valueOf(post.getDistance()));
         holder.likesTextView.setText(String.valueOf(post.getLikes()) + " likes");
         holder.timestamp.setText(post.getTimestampDifference());
 
         // Check if comments list is not null before accessing its size
         if (post.getComments() != null) {
+            Log.d("PostAdapter", "Comments loaded for post: " + post.getPostTitle() + ", size: " + post.getComments().size());
             holder.commentsTextView.setText(String.valueOf(post.getComments().size()) + " Comments");
         } else {
             holder.commentsTextView.setText("0 Comments"); // Set default value if comments list is null
+            Log.d("PostAdapter", "No comments found for post: " + post.getPostTitle());
         }
 
         // Load image using Picasso

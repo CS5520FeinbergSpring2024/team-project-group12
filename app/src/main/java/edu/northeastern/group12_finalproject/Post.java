@@ -41,9 +41,6 @@ public class Post {
         // note: when initialized as an empty array, the comments field doesnt show up in Realtime DB.
         // But adding a comment upon initialization includes comments field in the DB correctly
         this.comments = new ArrayList<>(); // Initialize comments as an empty list if comments is null
-        // this.comments.add("This is a sample comment.");
-
-
     }
 
     // getters and setters
@@ -125,6 +122,9 @@ public class Post {
     }
 
     public void addComment(Comment comment) {
+        if (comments == null) {
+            comments = new ArrayList<>(); // Initialize comments list if null
+        }
         comments.add(comment);
     }
 

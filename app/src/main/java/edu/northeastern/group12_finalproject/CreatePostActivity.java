@@ -422,6 +422,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
                                         // generate unique key for post
                                         String postId = postsRef.push().getKey();
+                                        post.setPostId(postId);
 
                                         // save the post to the Realtime DB using key
                                         postsRef.child(postId).setValue(post)

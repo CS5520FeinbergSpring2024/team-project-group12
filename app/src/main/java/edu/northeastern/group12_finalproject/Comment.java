@@ -13,6 +13,10 @@ public class Comment implements Parcelable {
     private long timestamp;
     private String text;
 
+    public Comment() {
+        // Default constructor required for Firebase
+    }
+
     // Constructor
     public Comment(String username, long timestamp, String text) {
         this.username = username;

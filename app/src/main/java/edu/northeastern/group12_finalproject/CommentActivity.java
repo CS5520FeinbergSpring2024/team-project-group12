@@ -1,5 +1,6 @@
 package edu.northeastern.group12_finalproject;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -7,22 +8,30 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.icu.text.DateFormat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class CommentActivity extends AppCompatActivity {
@@ -35,6 +44,9 @@ public class CommentActivity extends AppCompatActivity {
     TextView distanceTextView;
     ImageView postImage;
     TextView timestamp;
+    EditText newCommentEditText;
+    private Post post;
+    private List<Comment> comments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +60,14 @@ public class CommentActivity extends AppCompatActivity {
         distanceTextView = findViewById(R.id.distance_text_view);
         postImage = findViewById(R.id.image_view);
         timestamp = findViewById(R.id.time_text_view);
+        newCommentEditText = findViewById(R.id.commentInputEditText);
 
 
         // Retrieve data from Intent
         // Retrieve data from Intent
         Intent intent = getIntent();
         String postId = intent.getStringExtra("postId");
+        Log.d("CommentActivity", "Received postId: " + postId);
         String postTitle = intent.getStringExtra("postTitle");
         String postDescription = intent.getStringExtra("description");
         String imageUrl = intent.getStringExtra("imageUrl");
@@ -61,7 +75,7 @@ public class CommentActivity extends AppCompatActivity {
         int activeMinutes = intent.getIntExtra("activeMinutes", 0);
         int distance = intent.getIntExtra("distance", 0);
         long postTimestamp = intent.getLongExtra("timestamp", 0);
-        ArrayList<Comment> comments = intent.getParcelableArrayListExtra("comments");
+        comments = intent.getParcelableArrayListExtra("comments");
         if (comments == null) {
             comments = new ArrayList<>(); // Initialize an empty list if comments are null
         }
@@ -90,7 +104,25 @@ public class CommentActivity extends AppCompatActivity {
         addCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Add comment functionality
+                String newCommentText = newCommentEditText.getText().toString().trim();
+                if (!newCommentText.isEmpty()) {
+                    // Create a new Comment object with the current user's username and timestamp
+                    FirebaseAuth auth = FirebaseAuth.getInstance();
+                    FirebaseUser user = auth.getCurrentUser();
+                    String username = user.getEmail(); // Use email as username for now
+                    long timestamp = System.currentTimeMillis(); // Current timestamp
+                    Comment newComment = new Comment(username, timestamp, newCommentText);
+                    retrievePostFromDatabase(postId, newComment);
+
+                    // Add the new comment to the list of comments
+                    comments.add(newComment);
+
+                    // Notify the adapter that the dataset has changed
+                    commentAdapter.notifyDataSetChanged();
+
+                    // Clear the EditText after adding the comment
+                    newCommentEditText.getText().clear();
+                }
             }
         });
 
@@ -125,4 +157,55 @@ public class CommentActivity extends AppCompatActivity {
                     DateFormat.getTimeInstance().format(calendar.getTime());
         }
     }
+
+    private void retrievePostFromDatabase(String postId, Comment newComment) {
+        DatabaseReference postRef = FirebaseDatabase.getInstance().getReference("posts").child(postId);
+        Log.d("RetrievePost", "Retrieving post from the database for postId: " + postId);
+        Log.d("RetrievePost", "Retrieving post from the database...");
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Log.d("RetrievePost", "Post with the given postId exists in the database");
+                    // Post with the given postId exists in the database
+                    Post post = dataSnapshot.getValue(Post.class);
+                    // Now you have the Post object, you can add the new comment to it
+                    if (post != null) {
+                        // Add the new comment locally to the Post object
+                        post.addComment(newComment);
+                        // Update the database to reflect the addition of the new comment
+                        DatabaseReference commentsRef = postRef.child("comments").push();
+                        commentsRef.setValue(newComment)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d("RetrievePost", "Comment added successfully");
+                                        // Comment added successfully
+                                        // You may want to notify the user or perform any other actions here
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d("RetrievePost", "Failed to add comment: " + e.getMessage());
+                                        // Failed to add comment
+                                        // You may want to notify the user or perform any other actions here
+                                    }
+                                });
+                    }
+                } else {
+                    Log.d("RetrievePost", "Post with the given postId does not exist");
+                    // Post with the given postId does not exist
+                    // You may want to handle this case accordingly
+                }
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // error handling
+            }
+        });
+    }
+
 }
