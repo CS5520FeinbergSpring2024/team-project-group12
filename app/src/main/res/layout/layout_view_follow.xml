@@ -81,7 +81,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tvFollowing" />
 
         <TextView
-            android:id="@+id/tvEditProfile"
+            android:id="@+id/tvFollow"
             android:layout_width="184dp"
             android:layout_height="27dp"
             android:background="@drawable/pine_border_bottom"

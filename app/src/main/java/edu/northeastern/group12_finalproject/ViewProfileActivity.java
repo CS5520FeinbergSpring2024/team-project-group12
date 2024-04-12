@@ -66,7 +66,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         // Set up follow action
-        tvFollow = findViewById(R.id.)
+        tvFollow = findViewById(R.id.tvFollow);
+        tvFollow.setOnClickListener();
 
     }
 }
