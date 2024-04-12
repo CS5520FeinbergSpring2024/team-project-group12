@@ -40,8 +40,8 @@ public class ViewProfileActivity extends AppCompatActivity {
     DatabaseReference usersDatabaseReference;
     DatabaseReference postsDatabaseReference;
 
-    int following_count;
-    int followed_count;
+    private int following_count = 0;
+    private int followed_count = 0;
     TextView followingCount;
     TextView followedCount;
     TextView viewProfileName;
@@ -204,6 +204,10 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         setupToolBar();
 
+    }
+
+    private void getFollowerCount() {
+        
     }
 
     private void isFollowing() {
