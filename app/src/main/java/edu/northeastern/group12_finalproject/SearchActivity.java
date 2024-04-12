@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -110,8 +111,11 @@ public class SearchActivity extends AppCompatActivity {
         nameListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Selected user navigate to profile activitty.
-
+                // Selected user navigate to viewProfile activity.
+                Intent intent = new Intent(SearchActivity.this, ViewProfileActivity.class);
+                intent.putExtra("calling activity", "Search Activity");
+                intent.putExtra("intent user", (Parcelable) myUserList.get(position));
+                startActivity(intent);
 
             }
         });
