@@ -207,7 +207,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     private void getFollowerCount() {
-        
+
     }
 
     private void isFollowing() {
