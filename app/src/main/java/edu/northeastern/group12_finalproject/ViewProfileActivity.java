@@ -76,7 +76,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         progBar.setVisibility(View.GONE);
 
         // Retrieve user information.
-        retrieveFirebaseInfo();
+        retrieveFirebaseInfo(viewUser);
 
         // Retrieve user posts.
         retrievePosts();
@@ -211,17 +211,45 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     // Retrieve user info from firebase.
-    private void retrieveFirebaseInfo() {
-        usersDatabaseReference = firebaseDatabase.getReference("Users");
-
+    private void retrieveFirebaseInfo(Users user) {
+        usersDatabaseReference = firebaseDatabase.getReference("Users").child(user.getUid());
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         // Initial View set up.
         viewProfileName = findViewById(R.id.profileName);
         viewProfileBio = findViewById(R.id.bio);
         displayNameTv = findViewById(R.id.display_name);
 
-        viewProfileName.setText(viewUser.getEmail());
-        viewProfileBio.setText(viewUser.getBio());
-        displayNameTv.setText(viewUser.getUsername());
+            usersDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        String email = dataSnapshot.child("email").getValue(String.class);
+                        String bio = dataSnapshot.child("bio").getValue(String.class);
+                        String username = dataSnapshot.child("username").getValue(String.class);
+                        // Set the retrieved information to the corresponding TextViews
+                        if (email != null) {
+                            viewProfileName.setText(email);
+                        }
+                        if (bio != null) {
+                            viewProfileBio.setText(bio);
+                        }
+                        if (username != null) {
+                            displayNameTv.setText(username);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    // Handle onCancelled event
+                }
+            });
+
+
+
+//        viewProfileName.setText(viewUser.getEmail());
+//        viewProfileBio.setText(viewUser.getBio());
+//        displayNameTv.setText(viewUser.getUsername());
     }
 
     // TODO: Not able to retrieve view posts yet.
