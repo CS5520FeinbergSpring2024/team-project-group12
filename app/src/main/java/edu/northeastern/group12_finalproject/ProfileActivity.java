@@ -286,7 +286,7 @@ public class ProfileActivity extends AppCompatActivity {
     private void getFollowerCount() {
         followed_count = 0;
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        Query query = reference.child("followed")
+        Query query = reference.child("follower")
                 .child(user.getUid());
         query.addValueEventListener(new ValueEventListener() {
             @Override

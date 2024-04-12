@@ -103,6 +103,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         isFollowing();
         getFollowerCount();
         getFollowingCount();
+
         // Tag follow
         tvFollow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,9 +215,9 @@ public class ViewProfileActivity extends AppCompatActivity {
     private void getFollowerCount() {
         followed_count = 0;
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-        Query query = reference.child("followed")
+        Query query = reference.child("follower")
                 .child(viewUser.getUid());
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot sp : snapshot.getChildren()) {
@@ -238,9 +239,10 @@ public class ViewProfileActivity extends AppCompatActivity {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         Query query = reference.child("following")
                 .child(viewUser.getUid());
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+
                 for (DataSnapshot sp : snapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: found following:" + sp.getValue());
                     following_count++;
