@@ -116,7 +116,6 @@ public class SearchActivity extends AppCompatActivity {
                 intent.putExtra("calling activity", "Search Activity");
                 intent.putExtra("intent user", (Parcelable) myUserList.get(position));
                 startActivity(intent);
-
             }
         });
     }
@@ -135,19 +134,12 @@ public class SearchActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     myUserList.clear();
                     for (DataSnapshot ds: snapshot.getChildren()) {
-//                    Users user = ds.getValue(Users.class);
-                        // Search all non-self user.
-                        String uid = ds.child("uid").getValue().toString();
-                        String email = ds.child("email").getValue().toString();
-                        String username = ds.child("username").getValue().toString();
-                        if (!(uid.equals(firebaseUser.getUid()))) {
-                            if ((email.toLowerCase().contains(keyword.toLowerCase()))
-                                    || username.toLowerCase().contains(keyword.toLowerCase())) {
-
-                                // Create new user.public Users(String bio, String username, String email, int following, int followed, String uid) {
-                                Users user = new Users("", username, email, 0, 0, uid);
-                                myUserList.add(user);
-                                updateUserList();
+                    Users user = ds.getValue(Users.class);
+                    if (!(user.getUid().equals(firebaseUser.getUid()))) {
+                        if ((user.getEmail().toLowerCase().contains(keyword.toLowerCase()))
+                                || user.getUsername().toLowerCase().contains(keyword.toLowerCase())) {
+                            myUserList.add(user);
+                            updateUserList();
                             }
                         }
                     }

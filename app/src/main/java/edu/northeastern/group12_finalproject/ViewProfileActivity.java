@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -32,6 +33,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
     FirebaseUser user;
+    Users viewUser;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference usersDatabaseReference;
     DatabaseReference postsDatabaseReference;
@@ -39,7 +41,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     TextView viewProfileName;
     TextView displayNameTv;
     TextView viewProfileBio;
-    TextView tvFollow;
+    TextView tvFollow, tvUnfollow;
 
     PostAdapter adapter;
 
@@ -61,6 +63,14 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         posts = new ArrayList<>();
 
+        // Get the user that's being viewed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            viewUser = getIntent().getParcelableExtra("intent user", Users.class);
+        }
+        else {
+            viewUser = getIntent().getParcelableExtra("intent user");
+        }
+
         // Progress bar
         progBar = (ProgressBar) findViewById(R.id.profileProgressBar);
         progBar.setVisibility(View.GONE);
@@ -78,10 +88,65 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         // Set up follow action
         tvFollow = findViewById(R.id.tvFollow);
+        // Tag follow
         tvFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "No clicked following" + user.getDisplayName());;
 
+                // TODO: CHange the following + Follower logic.
+                DatabaseReference following = FirebaseDatabase.getInstance().getReference()
+                        .child("following")
+                        // Current log in user
+                        .child(user.getUid())
+                        // The user being viewed
+                        .child(viewUser.getUid());
+                        // Add email to the node
+                        following.child("following_uid")
+                        // Add it to the node.
+                        .setValue(viewUser.getUid());
+                        following.child("email")
+                                .setValue(viewUser.getEmail());
+//                        following.child("username")
+//                                .setValue(viewUser.getUsername());
+
+                // Set up firebase follower info.
+                DatabaseReference follower = FirebaseDatabase.getInstance().getReference()
+                        .child("follower")
+                        .child(viewUser.getUid())
+                        .child(user.getUid());
+                        // Add email to the node.
+                follower.child("follower_uid")
+                        // Add it to the node.
+                        .setValue(user.getUid());
+                follower.child("email")
+                                .setValue(user.getEmail());
+                setFollowing();
+            }
+        });
+
+        // Tag unfollow.
+        tvUnfollow = findViewById(R.id.tvUnfollow);
+        tvUnfollow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "No clicked following" + user.getDisplayName());;
+
+                FirebaseDatabase.getInstance().getReference()
+                        .child("following")
+                        // Current log in user
+                        .child(user.getUid())
+                        // The user being viewed
+                        .child(viewUser.getUid())
+                        // Remove value
+                        .removeValue();
+
+                FirebaseDatabase.getInstance().getReference()
+                        .child("follower")
+                        .child(viewUser.getUid())
+                        .child(user.getUid())
+                        .removeValue();
+                setUnFollow();
             }
         });
 
@@ -107,6 +172,22 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         setupToolBar();
 
+    }
+
+    private void isFollowing() {
+        Log.d(TAG, "Is Following: checking if it's following");
+    }
+
+    private void setFollowing() {
+        Log.d(TAG, "Update set following");
+        tvFollow.setVisibility(View.GONE);
+        tvUnfollow.setVisibility(View.VISIBLE);
+    }
+
+    private void setUnFollow() {
+        Log.d(TAG, "Update set unfollow");
+        tvFollow.setVisibility(View.VISIBLE);
+        tvUnfollow.setVisibility(View.GONE);
     }
 
     private void setupToolBar() {
@@ -138,33 +219,12 @@ public class ViewProfileActivity extends AppCompatActivity {
         viewProfileBio = findViewById(R.id.bio);
         displayNameTv = findViewById(R.id.display_name);
 
-        Query userQuery = usersDatabaseReference.orderByChild("email").equalTo(user.getEmail());
-
-        userQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Check until required data gets updated
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-                    // Retrieve data
-                    String name = "" + dataSnapshot.child("username").getValue();
-                    String bioData = "" + dataSnapshot.child("bio").getValue();
-                    String email = "" + dataSnapshot.child("email").getValue();
-
-                    // Set data to textView.
-                    viewProfileName.setText(email);
-                    displayNameTv.setText(name);
-                    viewProfileBio.setText(bioData);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        viewProfileName.setText(viewUser.getEmail());
+        viewProfileBio.setText(viewUser.getBio());
+        displayNameTv.setText(viewUser.getUsername());
     }
 
-    // Retrieve user posts.
+    // TODO: Not able to retrieve view posts yet.
     private void retrievePosts() {
         // Get reference to the posts database.
         postsDatabaseReference = firebaseDatabase.getReference("posts");
