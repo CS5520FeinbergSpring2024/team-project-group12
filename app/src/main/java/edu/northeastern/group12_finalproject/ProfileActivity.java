@@ -46,6 +46,8 @@ public class ProfileActivity extends AppCompatActivity {
     TextView bio;
     TextView editTv;
 
+    TextView followedCount, followingCount;
+
     PostAdapter adapter;
 
     private ProgressBar progBar;
@@ -177,6 +179,8 @@ public class ProfileActivity extends AppCompatActivity {
         profileName = findViewById(R.id.profileName);
         bio = findViewById(R.id.bio);
         displayNameTv = findViewById(R.id.display_name);
+        followedCount = findViewById(R.id.tvFollowerNum);
+        followingCount = findViewById(R.id.tvFollowingNum);
 
         Query userQuery = usersDatabaseReference.orderByChild("email").equalTo(user.getEmail());
 
@@ -185,15 +189,22 @@ public class ProfileActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 // Check until required data gets updated
                 for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-                    // Retrieve data
-                    String name = "" + dataSnapshot.child("username").getValue();
-                    String bioData = "" + dataSnapshot.child("bio").getValue();
-                    String email = "" + dataSnapshot.child("email").getValue();
 
-                    // Set data to textView.
-                    profileName.setText(email);
-                    displayNameTv.setText(name);
-                    bio.setText(bioData);
+                    Users currUser = dataSnapshot.getValue(Users.class);
+                    profileName.setText(currUser.getEmail());
+                    bio.setText(currUser.getBio());
+                    displayNameTv.setText(currUser.getUsername());
+                    followedCount.setText(String.valueOf(currUser.getFollowed()));
+                    followingCount.setText(String.valueOf(currUser.getFollowing()));
+//                    // Retrieve data
+//                    String name = "" + dataSnapshot.child("username").getValue();
+//                    String bioData = "" + dataSnapshot.child("bio").getValue();
+//                    String email = "" + dataSnapshot.child("email").getValue();
+//
+//                    // Set data to textView.
+//                    profileName.setText(email);
+//                    displayNameTv.setText(name);
+//                    bio.setText(bioData);
                 }
             }
 

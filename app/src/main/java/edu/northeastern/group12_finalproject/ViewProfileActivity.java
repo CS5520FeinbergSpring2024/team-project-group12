@@ -42,6 +42,8 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     int following_count;
     int followed_count;
+    TextView followingCount;
+    TextView followedCount;
     TextView viewProfileName;
     TextView displayNameTv;
     TextView viewProfileBio;
@@ -80,7 +82,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         progBar.setVisibility(View.GONE);
 
         // Retrieve user information.
-        retrieveFirebaseInfo(viewUser);
+        retrieveFirebaseInfo();
 
         // Retrieve user posts.
         retrievePosts();
@@ -259,31 +261,41 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     // Retrieve user info from firebase.
-    private void retrieveFirebaseInfo(Users user) {
-        usersDatabaseReference = firebaseDatabase.getReference("Users").child(user.getUid());
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+    private void retrieveFirebaseInfo() {
+        usersDatabaseReference = firebaseDatabase.getReference("Users");
+        Query query = usersDatabaseReference.orderByChild("uid").equalTo(viewUser.getUid());
         // Initial View set up.
         viewProfileName = findViewById(R.id.profileName);
         viewProfileBio = findViewById(R.id.bio);
         displayNameTv = findViewById(R.id.display_name);
-        usersDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        followedCount = findViewById(R.id.tvFollowerNum);
+        followingCount = findViewById(R.id.tvFollowingNum);
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    String email = dataSnapshot.child("email").getValue(String.class);
-                    String bio = dataSnapshot.child("bio").getValue(String.class);
-                    String username = dataSnapshot.child("username").getValue(String.class);
-                    // Set the retrieved information to the corresponding TextViews
-                    if (email != null) {
-                        viewProfileName.setText(email);
-                    }
-                    if (bio != null) {
-                        viewProfileBio.setText(bio);
-                    }
-                    if (username != null) {
-                        displayNameTv.setText(username);
-                    }
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Users viewingUser = ds.getValue(Users.class);
+                    viewProfileName.setText(viewingUser.getEmail());
+                    viewProfileBio.setText(viewingUser.getBio());
+                    displayNameTv.setText(viewingUser.getUsername());
+                    followedCount.setText(String.valueOf(viewingUser.getFollowed()));
+                    followingCount.setText(String.valueOf(viewingUser.getFollowing()));
                 }
+//                if (dataSnapshot.exists()) {
+//                    String email = dataSnapshot.child("email").getValue(String.class);
+//                    String bio = dataSnapshot.child("bio").getValue(String.class);
+//                    String username = dataSnapshot.child("username").getValue(String.class);
+//                    // Set the retrieved information to the corresponding TextViews
+//                    if (email != null) {
+//                        viewProfileName.setText(email);
+//                    }
+//                    if (bio != null) {
+//                        viewProfileBio.setText(bio);
+//                    }
+//                    if (username != null) {
+//                        displayNameTv.setText(username);
+//                    }
+//                }
             }
 
             @Override
