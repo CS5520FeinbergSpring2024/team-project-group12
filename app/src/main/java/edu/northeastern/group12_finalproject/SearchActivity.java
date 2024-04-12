@@ -134,12 +134,12 @@ public class SearchActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     myUserList.clear();
                     for (DataSnapshot ds: snapshot.getChildren()) {
-                    Users user = ds.getValue(Users.class);
-                    if (!(user.getUid().equals(firebaseUser.getUid()))) {
-                        if ((user.getEmail().toLowerCase().contains(keyword.toLowerCase()))
-                                || user.getUsername().toLowerCase().contains(keyword.toLowerCase())) {
-                            myUserList.add(user);
-                            updateUserList();
+                        Users user = ds.getValue(Users.class);
+                        if (!(user.getUid().equals(firebaseUser.getUid()))) {
+                            if ((user.getEmail().toLowerCase().contains(keyword.toLowerCase()))
+                                    || user.getUsername().toLowerCase().contains(keyword.toLowerCase())) {
+                                myUserList.add(user);
+                                updateUserList();
                             }
                         }
                     }

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.ktx.Firebase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,8 @@ public class ViewProfileActivity extends AppCompatActivity {
     DatabaseReference usersDatabaseReference;
     DatabaseReference postsDatabaseReference;
 
+    int following_count;
+    int followed_count;
     TextView viewProfileName;
     TextView displayNameTv;
     TextView viewProfileBio;
@@ -88,6 +92,10 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         // Set up follow action
         tvFollow = findViewById(R.id.tvFollow);
+        // Tag unfollow.
+        tvUnfollow = findViewById(R.id.tvUnfollow);
+
+        isFollowing();
         // Tag follow
         tvFollow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,37 +104,59 @@ public class ViewProfileActivity extends AppCompatActivity {
 
                 // TODO: CHange the following + Follower logic.
                 DatabaseReference following = FirebaseDatabase.getInstance().getReference()
-                        .child("following")
+                        .child(getString(R.string.field_following))
                         // Current log in user
                         .child(user.getUid())
                         // The user being viewed
                         .child(viewUser.getUid());
                         // Add email to the node
-                        following.child("following_uid")
+                        following.child(getString(R.string.field_user_id))
                         // Add it to the node.
                         .setValue(viewUser.getUid());
-                        following.child("email")
+                        following.child(getString(R.string.field_email))
                                 .setValue(viewUser.getEmail());
 //                        following.child("username")
 //                                .setValue(viewUser.getUsername());
 
+//                // Update following count. This approach is too slow to fetch.
+//                DatabaseReference following_reference = firebaseDatabase.getReference("Users")
+//                        .child(user.getUid())
+//                        .child(getString(R.string.field_following));
+//
+//                int[] result = getUserFollowCount(user.getUid());
+//                following_count = result[0];
+//                following_count += 1;
+//                following_reference.setValue(following_count);
+
+
                 // Set up firebase follower info.
                 DatabaseReference follower = FirebaseDatabase.getInstance().getReference()
-                        .child("follower")
+                        .child("followed")
                         .child(viewUser.getUid())
                         .child(user.getUid());
                         // Add email to the node.
-                follower.child("follower_uid")
+                follower.child(getString(R.string.field_user_id))
                         // Add it to the node.
                         .setValue(user.getUid());
-                follower.child("email")
+                follower.child(getString(R.string.field_email))
                                 .setValue(user.getEmail());
+
+                // Update follower count. This method is too slow and fetch is not up to speed.
+//                DatabaseReference follower_reference = firebaseDatabase.getReference("Users")
+//                        .child(viewUser.getUid())
+//                        .child(getString(R.string.field_follower));
+//
+//                int[] result2 = getUserFollowCount(viewUser.getUid());
+//                followed_count = result[1];
+//                followed_count += 1;
+//                follower_reference.setValue(followed_count);
+
+                // And then increment followed.
                 setFollowing();
             }
         });
 
-        // Tag unfollow.
-        tvUnfollow = findViewById(R.id.tvUnfollow);
+
         tvUnfollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -176,6 +206,24 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     private void isFollowing() {
         Log.d(TAG, "Is Following: checking if it's following");
+        setUnFollow();
+        // Current Database reference.
+        Query query = FirebaseDatabase.getInstance().getReference().child(getString(R.string.field_following))
+                .child(user.getUid())
+                .orderByChild(getString(R.string.field_user_id)).equalTo(viewUser.getUid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    setFollowing();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void setFollowing() {
@@ -218,7 +266,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         viewProfileName = findViewById(R.id.profileName);
         viewProfileBio = findViewById(R.id.bio);
         displayNameTv = findViewById(R.id.display_name);
-
+        // TODO: Change to retrieve from firebase: more dynamic.
         viewProfileName.setText(viewUser.getEmail());
         viewProfileBio.setText(viewUser.getBio());
         displayNameTv.setText(viewUser.getUsername());
@@ -285,6 +333,32 @@ public class ViewProfileActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    // Write the logic to return following and followed count. Index 0: following. Index1: followed.
+    private int[] getUserFollowCount(String userID) {
+        int[] result = new int[2];
+        result[0] = 0;
+        result[1] = 0;
+        // Get a query based on uid.
+        Query query = firebaseDatabase.getReference("Users").orderByChild("uid").equalTo(userID);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds: snapshot.getChildren()) {
+                    String folCount = ds.child("following").getValue().toString();
+                    String foedCount = ds.child("followed").getValue().toString();
+                    result[0] = Integer.valueOf(folCount);
+                    result[1] = Integer.valueOf(foedCount);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return result;
     }
 
 }
