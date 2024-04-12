@@ -18,6 +18,9 @@
         android:theme="@style/Theme.Group12_FinalProject"
         tools:targetApi="31">
         <activity
+            android:name=".ViewProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".SignOutActivity"
             android:exported="false" />
         <activity
