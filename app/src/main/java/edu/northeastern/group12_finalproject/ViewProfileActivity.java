@@ -88,6 +88,9 @@ public class ViewProfileActivity extends AppCompatActivity {
         retrievePosts();
 
 
+        followingCount = findViewById(R.id.tvFollowingNum);
+        followedCount = findViewById(R.id.tvFollowerNum);
+
         // Set up adapter
         adapter = new PostAdapter(posts);
         recyclerView.setAdapter(adapter);
@@ -98,6 +101,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvUnfollow = findViewById(R.id.tvUnfollow);
 
         isFollowing();
+        getFollowerCount();
+        getFollowingCount();
         // Tag follow
         tvFollow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,7 +212,47 @@ public class ViewProfileActivity extends AppCompatActivity {
     }
 
     private void getFollowerCount() {
+        followed_count = 0;
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child("followed")
+                .child(viewUser.getUid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot sp : snapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: found follower:" + sp.getValue());
+                    followed_count++;
+                }
+                followedCount.setText(String.valueOf(followed_count));
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void getFollowingCount() {
+        following_count = 0;
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child("following")
+                .child(viewUser.getUid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot sp : snapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: found following:" + sp.getValue());
+                    following_count++;
+                }
+                followingCount.setText(String.valueOf(following_count));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void isFollowing() {
