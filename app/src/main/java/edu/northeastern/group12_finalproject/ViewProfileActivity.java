@@ -216,7 +216,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         Query query = reference.child("followed")
                 .child(viewUser.getUid());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot sp : snapshot.getChildren()) {
@@ -238,7 +238,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         Query query = reference.child("following")
                 .child(viewUser.getUid());
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot sp : snapshot.getChildren()) {
@@ -327,8 +327,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                     viewProfileName.setText(viewingUser.getEmail());
                     viewProfileBio.setText(viewingUser.getBio());
                     displayNameTv.setText(viewingUser.getUsername());
-                    followedCount.setText(String.valueOf(viewingUser.getFollowed()));
-                    followingCount.setText(String.valueOf(viewingUser.getFollowing()));
+//                    followedCount.setText(String.valueOf(viewingUser.getFollowed()));
+//                    followingCount.setText(String.valueOf(viewingUser.getFollowing()));
                 }
 //                if (dataSnapshot.exists()) {
 //                    String email = dataSnapshot.child("email").getValue(String.class);

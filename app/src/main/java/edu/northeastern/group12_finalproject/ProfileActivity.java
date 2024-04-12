@@ -40,6 +40,8 @@ public class ProfileActivity extends AppCompatActivity {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference usersDatabaseReference;
     DatabaseReference postsDatabaseReference;
+    int followed_count;
+    int following_count;
 
     TextView profileName;
     TextView displayNameTv;
@@ -81,6 +83,8 @@ public class ProfileActivity extends AppCompatActivity {
         // Retrieve user posts.
         retrievePosts();
 
+        getFollowerCount();
+        getFollowingCount();
 
         // Set up adapter
         adapter = new PostAdapter(posts);
@@ -194,8 +198,8 @@ public class ProfileActivity extends AppCompatActivity {
                     profileName.setText(currUser.getEmail());
                     bio.setText(currUser.getBio());
                     displayNameTv.setText(currUser.getUsername());
-                    followedCount.setText(String.valueOf(currUser.getFollowed()));
-                    followingCount.setText(String.valueOf(currUser.getFollowing()));
+//                    followedCount.setText(String.valueOf(currUser.getFollowed()));
+//                    followingCount.setText(String.valueOf(currUser.getFollowing()));
 //                    // Retrieve data
 //                    String name = "" + dataSnapshot.child("username").getValue();
 //                    String bioData = "" + dataSnapshot.child("bio").getValue();
@@ -276,6 +280,51 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    private void getFollowerCount() {
+        followed_count = 0;
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child("followed")
+                .child(user.getUid());
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot sp : snapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: found follower:" + sp.getValue());
+                    followed_count++;
+                }
+                followedCount.setText(String.valueOf(followed_count));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void getFollowingCount() {
+        following_count = 0;
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child("following")
+                .child(user.getUid());
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot sp : snapshot.getChildren()) {
+                    Log.d(TAG, "onDataChange: found following:" + sp.getValue());
+                    following_count++;
+                }
+                followingCount.setText(String.valueOf(following_count));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
 }
