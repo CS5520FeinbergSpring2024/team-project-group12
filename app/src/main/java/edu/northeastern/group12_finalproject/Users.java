@@ -11,6 +11,9 @@ public class Users implements Parcelable {
     private String email;
     private int following;
     private int followed;
+
+    private double activeMinutes;
+    private double distance;
     private String uid;
 
 
@@ -18,13 +21,15 @@ public class Users implements Parcelable {
     public Users() {
     }
     // Constructor with imageUrl parameter
-    public Users(String bio, String username, String email, int following, int followed, String uid) {
+    public Users(String bio, String username, String email, int following, int followed, String uid, double activeMinutes, double distance) {
         this.bio = bio;
         this.username = username;
         this.email = email;
         this.following = following;
         this.followed = followed;
         this.uid = uid;
+        this.activeMinutes = activeMinutes;
+        this.distance = distance;
     }
 
     protected Users(Parcel in) {
@@ -34,6 +39,8 @@ public class Users implements Parcelable {
         following = in.readInt();
         followed = in.readInt();
         uid = in.readString();
+        activeMinutes = in.readDouble();
+        distance = in.readDouble();
     }
 
     public static final Creator<Users> CREATOR = new Creator<Users>() {
@@ -70,6 +77,22 @@ public class Users implements Parcelable {
 
     public String getUid() {
         return uid;
+    }
+
+    public double getActiveMinutes() {
+        return activeMinutes;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setActiveMinutes(double activeMinutes) {
+        this.activeMinutes = activeMinutes;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
     }
 
     public void setBio(String bio) {
@@ -109,5 +132,7 @@ public class Users implements Parcelable {
         dest.writeInt(following);
         dest.writeInt(followed);
         dest.writeString(uid);
+        dest.writeDouble(activeMinutes);
+        dest.writeDouble(distance);
     }
 }
