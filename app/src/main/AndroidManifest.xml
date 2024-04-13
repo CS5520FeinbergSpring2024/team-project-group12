@@ -36,13 +36,7 @@
             android:name=".SignOutActivity"
             android:exported="false" />
         <activity
-            android:name=".AccountSettingActivity"
-            android:exported="false" />
-        <activity
             android:name=".SearchActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SignoutFragment"
             android:exported="false" />
         <activity
             android:name=".EditProfileActivity"
@@ -52,9 +46,6 @@
             android:exported="false" />
         <activity
             android:name=".CreatePostActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ImageUploadActivity"
             android:exported="false" />
         <activity
             android:name=".HomePageActivity"
