@@ -50,8 +50,6 @@ dependencies {
     implementation("com.google.firebase:firebase-database:20.3.1")
     implementation("com.google.firebase:firebase-storage:20.0.0")
 
-    // picasso
-    implementation("com.squareup.picasso:picasso:2.71828")
-
-
+    // Piccaso library
+    implementation ("com.squareup.picasso:picasso:2.71828")
 }

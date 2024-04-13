@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -25,10 +24,37 @@
             android:name=".CommentActivity"
             android:exported="false" />
         <activity
+            android:name=".FollowerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FollowingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignOutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AccountSettingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignoutFragment"
+            android:exported="false" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity
             android:name=".CreatePostActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ImageUploadActivity"
             android:exported="false" />
         <activity
             android:name=".HomePageActivity"
