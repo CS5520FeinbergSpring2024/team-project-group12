@@ -99,6 +99,14 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+        followingCount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, FollowingActivity.class);
+                startActivity(intent);
+            }
+        });
+
 
         // set up of bottom nav bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
