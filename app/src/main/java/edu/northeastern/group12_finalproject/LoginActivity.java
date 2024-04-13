@@ -14,14 +14,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.HashMap;
 
 /**
  * Inspired by Android Knowledge https://www.youtube.com/watch?v=TStttJRAPhE.
@@ -59,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
                                         // Display when login is successful.
                                         Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
 
-                                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                        startActivity(new Intent(LoginActivity.this, EdiProfileActivity.class));
                                         finish();
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {

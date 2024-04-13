@@ -51,6 +51,16 @@
                 android:padding="8dp"
                 android:hint="Password"/>
 
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/username"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="20dp"
+                android:drawableLeft="@drawable/baseline_lock_24"
+                android:padding="8dp"
+                android:hint="Username"/>
+
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="60dp"

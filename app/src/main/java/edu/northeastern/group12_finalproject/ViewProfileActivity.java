@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -301,7 +300,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     // method to open up home page activity
     // finished current activity to remove from backstack
     private void openHomePage() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, EdiProfileActivity.class);
         startActivity(intent);
         finish(); // Close current activity
     }
@@ -330,7 +329,9 @@ public class ViewProfileActivity extends AppCompatActivity {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Users viewingUser = ds.getValue(Users.class);
                     viewProfileName.setText(viewingUser.getEmail());
-                    viewProfileBio.setText(viewingUser.getBio());
+                    viewProfileBio.setText("Active Minutes: " + currUser.getActiveMinutes() + " minutes \n"
+                            + "Distance: " + currUser.getDistance() + " miles\n");
+                    displayNameTv.setText(currUser.getUsername());
                     displayNameTv.setText(viewingUser.getUsername());
 //                    followedCount.setText(String.valueOf(viewingUser.getFollowed()));
 //                    followingCount.setText(String.valueOf(viewingUser.getFollowing()));

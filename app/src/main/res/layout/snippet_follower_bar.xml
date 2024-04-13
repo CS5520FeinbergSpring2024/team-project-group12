@@ -12,9 +12,15 @@
             android:layout_height="wrap_content"
             android:id="@+id/profileToolBar">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/exit"
+                    android:src="@drawable/baseline_exit_24"/>
 
 
                 <TextView
@@ -30,7 +36,7 @@
 
 
 
-            </RelativeLayout>
+            </LinearLayout>
 
 
         </androidx.appcompat.widget.Toolbar>

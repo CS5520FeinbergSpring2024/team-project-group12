@@ -30,6 +30,7 @@ public class SignUpActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private EditText signUpEmail;
     private EditText signUpPassword;
+    private EditText username;
     private Button signupBtn;
     private TextView redirectLogin;
 
@@ -44,18 +45,26 @@ public class SignUpActivity extends AppCompatActivity {
         signUpPassword = findViewById(R.id.signup_password);
         signupBtn = findViewById(R.id.signup_button);
         redirectLogin = findViewById(R.id.loginRedirectText);
+        username = findViewById(R.id.username);
 
         signupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String user = signUpEmail.getText().toString().trim();
                 String password = signUpPassword.getText().toString().trim();
+                String name = username.getText().toString().trim();
 
                 if (user.isEmpty()) {
+                    Toast.makeText(SignUpActivity.this, "Email cannot be empty!", Toast.LENGTH_SHORT).show();
                     signUpEmail.setError("Email cannot be empty!");
                 }
                 if (password.isEmpty()) {
+                    Toast.makeText(SignUpActivity.this, "Password cannot be empty", Toast.LENGTH_SHORT).show();
                     signUpPassword.setError("Password cannot be empty!");
+                }
+                if (name.isEmpty()) {
+                    Toast.makeText(SignUpActivity.this, "Username cannot be empty", Toast.LENGTH_SHORT).show();
+                    signUpPassword.setError("Username cannot be empty");
                 }
                 else {
                     auth.createUserWithEmailAndPassword(user, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -69,7 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 String email = user.getEmail();
                                 String uid = user.getUid();
 
-                                Users newUser = new Users("Active Minutes: 0\nDistance: 0", "Unknown user", email, 0, 0, uid, 0, 0);
+                                Users newUser = new Users("Active Minutes: 0\nDistance: 0", name, email, 0, 0, uid, 0, 0);
 
                                 // When user is registered store user info in firebase realtime.
 
@@ -82,7 +91,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 reference.child(uid).setValue(newUser);
 
                                 // Redirect to homepage.
-                                startActivity(new Intent(SignUpActivity.this, EditProfileActivity.class));
+                                startActivity(new Intent(SignUpActivity.this, ProfileActivity.class));
                             } else {
                                 if (password.length() < 6) {
                                     Toast.makeText(SignUpActivity.this, "Your password is too short. Should be longer than 6 characters/numbers", Toast.LENGTH_LONG).show();

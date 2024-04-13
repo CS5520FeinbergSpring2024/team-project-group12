@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,6 +36,7 @@ public class FollowerActivity extends AppCompatActivity {
     // Widgets.
     private TextView followerTV;
     private ListView nameListView;
+    private ImageView exitImage;
     private ProgressBar progressBar;
 
     // Name list for the searched users.
@@ -57,6 +59,8 @@ public class FollowerActivity extends AppCompatActivity {
         followerTV = findViewById(R.id.followerTV);
         nameListView = (ListView) findViewById(R.id.lvfollower);
         progressBar = findViewById(R.id.followerProgressBar);
+        exitImage = findViewById(R.id.exit);
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         // Get the user that's being viewed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -71,6 +75,14 @@ public class FollowerActivity extends AppCompatActivity {
         followingIDs = new ArrayList<>();
         showFollowing();
         progressBar.setVisibility(View.GONE);
+
+        exitImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FollowerActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
 
         Log.d(TAG, "FOLLOWING! outside thread " + followingIDs);
 
@@ -150,7 +162,7 @@ public class FollowerActivity extends AppCompatActivity {
     // method to open up home page activity
     // finished current activity to remove from backstack
     private void openHomePage() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, EdiProfileActivity.class);
         startActivity(intent);
         finish(); // Close current activity
     }

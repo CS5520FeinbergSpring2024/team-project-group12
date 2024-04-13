@@ -35,19 +35,46 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bio_change"
-            android:text="New bio"
+            android:text="Old password"
             />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/edit_bio"/>
+            android:id="@+id/old_password"/>
 
-        <Button
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Confirm"
-            android:id="@+id/confirm_button"/>
+            android:id="@+id/password_change"
+            android:text="New password"
+            />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/change_password"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confirm"
+                android:id="@+id/confirm_button"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Exit"
+                android:id="@+id/exit_button"/>
+
+        </LinearLayout>
+
+
 
     </LinearLayout>
 

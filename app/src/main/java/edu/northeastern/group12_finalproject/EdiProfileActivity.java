@@ -26,7 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class EdiProfileActivity extends AppCompatActivity {
 
 
     private DatabaseReference databaseReference;
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+                Intent intent = new Intent(EdiProfileActivity.this, SearchActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     recyclerView.setAdapter(adapter);
                 } else {
                     // No post found for the current user
-                    Toast.makeText(MainActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EdiProfileActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     // method to open up home page activity
     // finished current activity to remove from backstack
     private void openHomePage() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, EdiProfileActivity.class);
         startActivity(intent);
         finish();
     }

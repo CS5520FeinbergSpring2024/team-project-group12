@@ -9,13 +9,12 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,14 +29,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import org.checkerframework.checker.units.qual.A;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class FollowingActivity extends AppCompatActivity {
     // Widgets.
     private TextView followingTV;
+    private ImageView exitImage;
     private ListView nameListView;
     private ProgressBar progressBar;
 
@@ -61,6 +59,8 @@ public class FollowingActivity extends AppCompatActivity {
         followingTV = findViewById(R.id.followerTV);
         nameListView = (ListView) findViewById(R.id.lvfollowing);
         progressBar = findViewById(R.id.followingProgressBar);
+        exitImage = findViewById(R.id.exit);
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         // Get the user that's being viewed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -76,7 +76,13 @@ public class FollowingActivity extends AppCompatActivity {
         showFollowing();
         progressBar.setVisibility(View.GONE);
 
-        Log.d(TAG, "FOLLOWING! outside thread " + followingIDs);
+        exitImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FollowingActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
 
@@ -153,7 +159,7 @@ public class FollowingActivity extends AppCompatActivity {
     // method to open up home page activity
     // finished current activity to remove from backstack
     private void openHomePage() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, EdiProfileActivity.class);
         startActivity(intent);
         finish(); // Close current activity
     }

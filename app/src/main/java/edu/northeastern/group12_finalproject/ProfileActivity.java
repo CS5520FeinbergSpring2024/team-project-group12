@@ -7,13 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -182,7 +179,7 @@ public class ProfileActivity extends AppCompatActivity {
     // method to open up home page activity
     // finished current activity to remove from backstack
     private void openHomePage() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, EditProfileActivity.class);
         startActivity(intent);
         finish(); // Close current activity
     }
@@ -217,19 +214,9 @@ public class ProfileActivity extends AppCompatActivity {
                     Users currUser = dataSnapshot.getValue(Users.class);
                     currSentUser = currUser;
                     profileName.setText(currUser.getEmail());
-                    bio.setText(currUser.getBio());
+                    bio.setText("Active Minutes: " + currUser.getActiveMinutes() + " minutes \n"
+                            + "Distance: " + currUser.getDistance() + " miles\n");
                     displayNameTv.setText(currUser.getUsername());
-//                    followedCount.setText(String.valueOf(currUser.getFollowed()));
-//                    followingCount.setText(String.valueOf(currUser.getFollowing()));
-//                    // Retrieve data
-//                    String name = "" + dataSnapshot.child("username").getValue();
-//                    String bioData = "" + dataSnapshot.child("bio").getValue();
-//                    String email = "" + dataSnapshot.child("email").getValue();
-//
-//                    // Set data to textView.
-//                    profileName.setText(email);
-//                    displayNameTv.setText(name);
-//                    bio.setText(bioData);
                 }
             }
 
