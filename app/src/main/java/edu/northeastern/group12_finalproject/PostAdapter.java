@@ -138,6 +138,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return postList.size();
     }
 
+    // Method to update the data in your adapter
+    public void updateData(List<Post> newPosts) {
+        postList.clear(); // Clear the existing data
+        postList.addAll(newPosts); // Add the new data
+        notifyDataSetChanged(); // Notify the adapter that the data set has changed
+    }
+
     static class PostViewHolder extends RecyclerView.ViewHolder {
         TextView titleTextView;
         TextView descriptionTextView;
