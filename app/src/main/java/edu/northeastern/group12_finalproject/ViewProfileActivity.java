@@ -370,12 +370,13 @@ public class ViewProfileActivity extends AppCompatActivity {
                 for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
                     String postId = dataSnapshot.child("postId").getValue(String.class);
                     String userName = dataSnapshot.child("username").getValue(String.class);
+                    String userID = dataSnapshot.child("userID").getValue(String.class);
                     String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
                     String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
                     Float distance = dataSnapshot.child("distance").getValue(Float.class);
                     String description = dataSnapshot.child("description").getValue(String.class);
 
-                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+                    Post newPost = new Post(postId, userName, userID, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
                     posts.add(newPost);
                     adapter.notifyDataSetChanged();
                     Log.d(TAG, "Data added");
@@ -398,12 +399,13 @@ public class ViewProfileActivity extends AppCompatActivity {
 //                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
                     String postId = dataSnapshot.child("postId").getValue(String.class);
                     String userName = dataSnapshot.child("username").getValue(String.class);
+                    String userID = dataSnapshot.child("username").getValue(String.class);
                     String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
                     String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
                     Float distance = dataSnapshot.child("distance").getValue(Float.class);
                     String description = dataSnapshot.child("description").getValue(String.class);
                     Log.d(TAG, "Data added");
-                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+                    Post newPost = new Post(postId, userName, userID, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
 
                     posts.add(newPost);
                     adapter.notifyDataSetChanged();

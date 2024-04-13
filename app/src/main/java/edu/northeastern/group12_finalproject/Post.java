@@ -14,6 +14,7 @@ public class Post {
 
     private String postId; // unique identifier for Post in database
     private String username;
+    private String userID;
     private long timestamp;
     private String imageUrl;
     private String postTitle;
@@ -31,9 +32,10 @@ public class Post {
         //this.comments = new ArrayList<>(); // initialize comments as empty array
     }
     // Constructor with imageUrl parameter
-    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int activeMinutes, float distance) {
+    public Post(String postId, String username, String userID, long timestamp, String imageUrl, String postTitle, String description, int activeMinutes, float distance) {
         this.postId = postId;
         this.username = username;
+        this.userID = userID;
         this.timestamp = timestamp;
         this.imageUrl = imageUrl;
         this.postTitle = postTitle;
@@ -61,6 +63,14 @@ public class Post {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     public long getTimestamp() {

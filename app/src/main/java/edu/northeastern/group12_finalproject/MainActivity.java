@@ -72,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
         // set listener to retrieve data and store userIds from following node into list
         List<String> followingUserIds = new ArrayList<>();
+        // add current logged in user to "following" list, so their posts are also shown on MainFeed
+        followingUserIds.add(currentUserId);
         followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -122,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
         for (String userId : userIds) {
             Log.d("MainActivity", "Querying for posts with username: " + userId);
-            Query query =  databaseReference.orderByChild("username").equalTo(userId);
+            Query query =  databaseReference.orderByChild("userID").equalTo(userId);
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -180,8 +182,8 @@ public class MainActivity extends AppCompatActivity {
     private List<Post> createDummyPosts() {
         List<Post> posts = new ArrayList<>();
         // Create and add dummy posts
-        posts.add(new Post("1", "User1", System.currentTimeMillis(), "image_url1", "Title1", "Description1", 10, 1.5f));
-        posts.add(new Post("2", "User2", System.currentTimeMillis(), "image_url2", "Title2", "Description2", 20, 2.5f));
+        posts.add(new Post("1", "User1", "userID1", System.currentTimeMillis(), "image_url1", "Title1", "Description1", 10, 1.5f));
+        posts.add(new Post("2", "User2", "userID2", System.currentTimeMillis(), "image_url2", "Title2", "Description2", 20, 2.5f));
         return posts;
     }
 }

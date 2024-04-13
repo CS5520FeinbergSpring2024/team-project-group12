@@ -365,11 +365,12 @@ public class CreatePostActivity extends AppCompatActivity {
         // get username of user who posts:
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
+        String userID = user.getUid();
         // Changed for a Post to be uploaded with userID to make querying the DB for Followers' Posts easier
-        String username = user.getUid();
+        String username = user.getEmail();
 
         // create and return Post object
-        return new Post("postId", username, System.currentTimeMillis(), null, title, description, totalDuration, postDistance);
+        return new Post("postId", username, userID, System.currentTimeMillis(), null, title, description, totalDuration, postDistance);
     }
 
     /**
