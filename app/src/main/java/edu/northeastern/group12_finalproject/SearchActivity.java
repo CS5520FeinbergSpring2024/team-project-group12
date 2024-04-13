@@ -46,6 +46,7 @@ public class SearchActivity extends AppCompatActivity {
     // Name list for the searched users.
     private List<Users> myUserList;
     private UserListAdapter listAdapter;
+    private Users currentUser;
 
 
     @Override
@@ -115,6 +116,7 @@ public class SearchActivity extends AppCompatActivity {
                 Intent intent = new Intent(SearchActivity.this, ViewProfileActivity.class);
                 intent.putExtra("calling activity", "Search Activity");
                 intent.putExtra("intent user", (Parcelable) myUserList.get(position));
+                intent.putExtra("current user", (Parcelable) currentUser);
                 startActivity(intent);
             }
         });
@@ -141,6 +143,9 @@ public class SearchActivity extends AppCompatActivity {
                                 myUserList.add(user);
                                 updateUserList();
                             }
+                        }
+                        else {
+                            currentUser = ds.getValue(Users.class);
                         }
                     }
                 }

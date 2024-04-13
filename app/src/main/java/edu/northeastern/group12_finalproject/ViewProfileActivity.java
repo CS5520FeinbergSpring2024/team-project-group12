@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +25,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.ktx.Firebase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +32,7 @@ import java.util.List;
 public class ViewProfileActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
-    FirebaseUser user;
+    Users currUser;
     Users viewUser;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference usersDatabaseReference;
@@ -60,7 +58,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         // Firebase initialization.
         firebaseAuth = FirebaseAuth.getInstance();
-        user = firebaseAuth.getCurrentUser();
+//        currUser = firebaseAuth.getCurrentUser();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -72,9 +70,11 @@ public class ViewProfileActivity extends AppCompatActivity {
         // Get the user that's being viewed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             viewUser = getIntent().getParcelableExtra("intent user", Users.class);
+            currUser = getIntent().getParcelableExtra("current user", Users.class);
         }
         else {
             viewUser = getIntent().getParcelableExtra("intent user");
+            currUser = getIntent().getParcelableExtra("current user");
         }
 
         // Progress bar
@@ -85,7 +85,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         retrieveFirebaseInfo();
 
         // Retrieve user posts.
-        retrievePosts();
+//        retrievePosts();
 
 
         followingCount = findViewById(R.id.tvFollowingNum);
@@ -108,21 +108,21 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "No clicked following" + user.getDisplayName());;
+                Log.d(TAG, "No clicked following" + currUser.getUsername());;
 
                 // TODO: CHange the following + Follower logic.
                 DatabaseReference following = FirebaseDatabase.getInstance().getReference()
                         .child(getString(R.string.field_following))
                         // Current log in user
-                        .child(user.getUid())
+                        .child(currUser.getUid())
                         // The user being viewed
                         .child(viewUser.getUid());
                         // Add email to the node
-                        following.child(getString(R.string.field_user_id))
+//                        following.child(getString(R.string.field_user_id))
                         // Add it to the node.
-                        .setValue(viewUser.getUid());
-                        following.child(getString(R.string.field_email))
-                                .setValue(viewUser.getEmail());
+                        following.setValue(viewUser);
+//                        following.child(getString(R.string.field_email))
+//                                .setValue(viewUser.getEmail());
 //                        following.child("username")
 //                                .setValue(viewUser.getUsername());
 
@@ -136,18 +136,18 @@ public class ViewProfileActivity extends AppCompatActivity {
 //                following_count += 1;
 //                following_reference.setValue(following_count);
 
-
                 // Set up firebase follower info.
                 DatabaseReference follower = FirebaseDatabase.getInstance().getReference()
                         .child(getString(R.string.field_follower))
                         .child(viewUser.getUid())
-                        .child(user.getUid());
+                        .child(currUser.getUid());
+                follower.setValue(currUser);
                         // Add email to the node.
-                follower.child(getString(R.string.field_user_id))
-                        // Add it to the node.
-                        .setValue(user.getUid());
-                follower.child(getString(R.string.field_email))
-                                .setValue(user.getEmail());
+//                follower.child(getString(R.string.field_user_id))
+//                        // Add it to the node.
+//                        .setValue(currUser.getUid());
+//                follower.child(getString(R.string.field_email))
+//                                .setValue(currUser.getEmail());
 
                 // Update follower count. This method is too slow and fetch is not up to speed.
 //                DatabaseReference follower_reference = firebaseDatabase.getReference("Users")
@@ -168,12 +168,12 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvUnfollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "No clicked following" + user.getDisplayName());;
+                Log.d(TAG, "No clicked following" + currUser.getUsername());;
 
                 FirebaseDatabase.getInstance().getReference()
                         .child("following")
                         // Current log in user
-                        .child(user.getUid())
+                        .child(currUser.getUid())
                         // The user being viewed
                         .child(viewUser.getUid())
                         // Remove value
@@ -182,7 +182,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                 FirebaseDatabase.getInstance().getReference()
                         .child("follower")
                         .child(viewUser.getUid())
-                        .child(user.getUid())
+                        .child(currUser.getUid())
                         .removeValue();
                 setUnFollow();
             }
@@ -262,8 +262,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         setUnFollow();
         // Current Database reference.
         Query query = FirebaseDatabase.getInstance().getReference().child(getString(R.string.field_following))
-                .child(user.getUid())
-                .orderByChild(getString(R.string.field_user_id)).equalTo(viewUser.getUid());
+                .child(currUser.getUid())
+                .orderByChild("uid").equalTo(viewUser.getUid());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -362,7 +362,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         postsDatabaseReference = firebaseDatabase.getReference("posts");
 
         // Use email as the identifier.
-        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(user.getEmail());
+        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(currUser.getEmail());
         // Get one child.
         postQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

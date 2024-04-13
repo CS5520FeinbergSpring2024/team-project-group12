@@ -11,6 +11,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,6 +52,7 @@ public class ProfileActivity extends AppCompatActivity {
     TextView followedCount, followingCount;
 
     PostAdapter adapter;
+    private Users currSentUser;
 
     private ProgressBar progBar;
     private List<Post> posts;
@@ -103,10 +105,18 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(ProfileActivity.this, FollowingActivity.class);
+                intent.putExtra("current user", (Parcelable) currSentUser);
                 startActivity(intent);
             }
         });
-
+        followedCount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ProfileActivity.this, FollowerActivity.class);
+                intent.putExtra("current user", (Parcelable) currSentUser);
+                startActivity(intent);
+            }
+        });
 
         // set up of bottom nav bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -203,6 +213,7 @@ public class ProfileActivity extends AppCompatActivity {
                 for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
 
                     Users currUser = dataSnapshot.getValue(Users.class);
+                    currSentUser = currUser;
                     profileName.setText(currUser.getEmail());
                     bio.setText(currUser.getBio());
                     displayNameTv.setText(currUser.getUsername());
