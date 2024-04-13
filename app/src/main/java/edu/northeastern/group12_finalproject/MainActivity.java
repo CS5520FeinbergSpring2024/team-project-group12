@@ -26,9 +26,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collections;
+
 
 public class MainActivity extends AppCompatActivity {
-
 
     private DatabaseReference databaseReference;
     private RecyclerView recyclerView;
@@ -78,9 +79,6 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
         // set listener to retrieve data and store userIds from following node into list
         List<String> followingUserIds = new ArrayList<>();
-
-        // add current logged in user to "following" list, so their posts are also shown on MainFeed
-        followingUserIds.add(currentUserId);
 
         followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -159,7 +157,9 @@ public class MainActivity extends AppCompatActivity {
 
         for (String userId : userIds) {
             Log.d("MainActivity", "Querying for posts with username: " + userId);
-            Query query =  FirebaseDatabase.getInstance().getReference().child("posts").orderByChild("userID").equalTo(userId);
+            Query query =  FirebaseDatabase.getInstance().getReference().child("posts")
+                    .orderByChild("userID")
+                    .equalTo(userId);
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -172,6 +172,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                     // check if all queries are done
                     if (remainingCalls.decrementAndGet() == 0) {
+                        // Sort posts by timestamp in descending order (to show newest Posts at top of feed)
+                        Collections.sort(allPosts, (post1, post2) -> Long.compare(post2.getTimestamp(), post1.getTimestamp()));
                         // ensure that updates to RecyclerView are happening on the main thread
                         runOnUiThread(() -> {
                             Log.d("MainActivity", "Updating RecyclerView with posts");
