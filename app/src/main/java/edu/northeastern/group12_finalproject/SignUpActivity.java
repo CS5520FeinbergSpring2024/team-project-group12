@@ -56,7 +56,8 @@ public class SignUpActivity extends AppCompatActivity {
                 }
                 if (password.isEmpty()) {
                     signUpPassword.setError("Password cannot be empty!");
-                } else {
+                }
+                else {
                     auth.createUserWithEmailAndPassword(user, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -83,6 +84,9 @@ public class SignUpActivity extends AppCompatActivity {
                                 // Redirect to homepage.
                                 startActivity(new Intent(SignUpActivity.this, EditProfileActivity.class));
                             } else {
+                                if (password.length() < 6) {
+                                    Toast.makeText(SignUpActivity.this, "Your password is too short. Should be longer than 6 characters/numbers", Toast.LENGTH_LONG).show();
+                                }
                                 Toast.makeText(SignUpActivity.this, "Fail to signUp", Toast.LENGTH_SHORT).show();
                             }
                         }

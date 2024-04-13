@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,6 +38,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference usersDatabaseReference;
     DatabaseReference postsDatabaseReference;
+    RecyclerView recyclerView;
 
     private int following_count = 0;
     private int followed_count = 0;
@@ -62,8 +64,9 @@ public class ViewProfileActivity extends AppCompatActivity {
 
         firebaseDatabase = FirebaseDatabase.getInstance();
 
-        RecyclerView recyclerView = findViewById(R.id.profileRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+//        RecyclerView recyclerView = findViewById(R.id.viewProfileRecyclerView);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
 
         posts = new ArrayList<>();
 
@@ -84,16 +87,16 @@ public class ViewProfileActivity extends AppCompatActivity {
         // Retrieve user information.
         retrieveFirebaseInfo();
 
-        // Retrieve user posts.
-//        retrievePosts();
+//         Retrieve user posts.
+        retrievePosts();
 
 
         followingCount = findViewById(R.id.tvFollowingNum);
         followedCount = findViewById(R.id.tvFollowerNum);
 
-        // Set up adapter
-        adapter = new PostAdapter(posts);
-        recyclerView.setAdapter(adapter);
+//        // Set up adapter
+//        adapter = new PostAdapter(posts);
+//        recyclerView.setAdapter(adapter);
 
         // Set up follow action
         tvFollow = findViewById(R.id.tvFollow);
@@ -359,90 +362,93 @@ public class ViewProfileActivity extends AppCompatActivity {
     // TODO: Not able to retrieve view posts yet.
     private void retrievePosts() {
         // Get reference to the posts database.
-        postsDatabaseReference = firebaseDatabase.getReference("posts");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("posts");
+        String username = viewUser.getEmail();
 
-        // Use email as the identifier.
-        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(currUser.getEmail());
-        // Get one child.
-        postQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+        recyclerView = findViewById(R.id.viewProfileRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // Query the database for the post with the matching username
+        Query query = databaseReference.orderByChild("username").equalTo(username);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-                    String postId = dataSnapshot.child("postId").getValue(String.class);
-                    String userName = dataSnapshot.child("username").getValue(String.class);
-                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
-                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
-                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
-                    String description = dataSnapshot.child("description").getValue(String.class);
-
-                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
-                    posts.add(newPost);
-                    adapter.notifyDataSetChanged();
-                    Log.d(TAG, "Data added");
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
-        // Update newly added posts to our posts list recycler view.
-        postQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-//                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
-                    String postId = dataSnapshot.child("postId").getValue(String.class);
-                    String userName = dataSnapshot.child("username").getValue(String.class);
-                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
-                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
-                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
-                    String description = dataSnapshot.child("description").getValue(String.class);
-                    Log.d(TAG, "Data added");
-                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
-
-                    posts.add(newPost);
-                    adapter.notifyDataSetChanged();
-                    Log.d(TAG, "Data added");
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Post found, populate RecyclerView with the queried post
+                    List<Post> posts = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Post post = snapshot.getValue(Post.class);
+                        posts.add(post);
+                    }
+                    adapter = new PostAdapter(posts);
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    // No post found for the current user
+                    Toast.makeText(ViewProfileActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle database error
+                Log.e("MainActivity", "Database error: " + databaseError.getMessage());
             }
         });
+
+
+//        // Update newly added posts to our posts list recycler view.
+//        postQuery.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+////                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
+//                    String postId = dataSnapshot.child("postId").getValue(String.class);
+//                    String userName = dataSnapshot.child("username").getValue(String.class);
+//                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
+//                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
+//                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
+//                    String description = dataSnapshot.child("description").getValue(String.class);
+//                    Log.d(TAG, "Data added");
+//                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+//
+//                    posts.add(newPost);
+//                    adapter.notifyDataSetChanged();
+//                    Log.d(TAG, "Data added");
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
 
     }
+//
+//    // Write the logic to return following and followed count. Index 0: following. Index1: followed.
+//    private int[] getUserFollowCount(String userID) {
+//        int[] result = new int[2];
+//        result[0] = 0;
+//        result[1] = 0;
+//        // Get a query based on uid.
+//        Query query = firebaseDatabase.getReference("Users").orderByChild("uid").equalTo(userID);
+//        query.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot ds: snapshot.getChildren()) {
+//                    String folCount = ds.child("following").getValue().toString();
+//                    String foedCount = ds.child("followed").getValue().toString();
+//                    result[0] = Integer.valueOf(folCount);
+//                    result[1] = Integer.valueOf(foedCount);
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+//        return result;
+//    }
 
-    // Write the logic to return following and followed count. Index 0: following. Index1: followed.
-    private int[] getUserFollowCount(String userID) {
-        int[] result = new int[2];
-        result[0] = 0;
-        result[1] = 0;
-        // Get a query based on uid.
-        Query query = firebaseDatabase.getReference("Users").orderByChild("uid").equalTo(userID);
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot ds: snapshot.getChildren()) {
-                    String folCount = ds.child("following").getValue().toString();
-                    String foedCount = ds.child("followed").getValue().toString();
-                    result[0] = Integer.valueOf(folCount);
-                    result[1] = Integer.valueOf(foedCount);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-        return result;
-    }
 
 }

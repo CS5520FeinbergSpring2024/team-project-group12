@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,7 @@ public class ProfileActivity extends AppCompatActivity {
     TextView editTv;
 
     TextView followedCount, followingCount;
+    RecyclerView recyclerView;
 
     PostAdapter adapter;
     private Users currSentUser;
@@ -88,9 +90,9 @@ public class ProfileActivity extends AppCompatActivity {
         getFollowerCount();
         getFollowingCount();
 
-        // Set up adapter
-        adapter = new PostAdapter(posts);
-        recyclerView.setAdapter(adapter);
+//        // Set up adapter
+//        adapter = new PostAdapter(posts);
+//        recyclerView.setAdapter(adapter);
 
         // Take you to edit profile page.
         editTv = findViewById(R.id.tvEditProfile);
@@ -241,63 +243,92 @@ public class ProfileActivity extends AppCompatActivity {
     // Retrieve user posts.
     private void retrievePosts() {
         // Get reference to the posts database.
-        postsDatabaseReference = firebaseDatabase.getReference("posts");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("posts");
+        String username = user.getEmail();
 
-        // Use email as the identifier.
-        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(user.getEmail());
-        // Get one child.
-        postQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+        recyclerView = findViewById(R.id.profileRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // Query the database for the post with the matching username
+        Query query = databaseReference.orderByChild("username").equalTo(username);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-                    String postId = dataSnapshot.child("postId").getValue(String.class);
-                    String userName = dataSnapshot.child("username").getValue(String.class);
-                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
-                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
-                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
-                    String description = dataSnapshot.child("description").getValue(String.class);
-
-                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
-                    posts.add(newPost);
-                    adapter.notifyDataSetChanged();
-                    Log.d(TAG, "Data added");
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
-        // Update newly added posts to our posts list recycler view.
-        postQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-//                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
-                    String postId = dataSnapshot.child("postId").getValue(String.class);
-                    String userName = dataSnapshot.child("username").getValue(String.class);
-                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
-                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
-                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
-                    String description = dataSnapshot.child("description").getValue(String.class);
-                    Log.d(TAG, "Data added");
-                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
-
-                    posts.add(newPost);
-                    adapter.notifyDataSetChanged();
-                    Log.d(TAG, "Data added");
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Post found, populate RecyclerView with the queried post
+                    List<Post> posts = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Post post = snapshot.getValue(Post.class);
+                        posts.add(post);
+                    }
+                    adapter = new PostAdapter(posts);
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    // No post found for the current user
+                    Toast.makeText(ProfileActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle database error
+                Log.e("MainActivity", "Database error: " + databaseError.getMessage());
             }
         });
+//        // Use email as the identifier.
+//        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(user.getEmail());
+//        // Get one child.
+//        postQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+//                    String postId = dataSnapshot.child("postId").getValue(String.class);
+//                    String userName = dataSnapshot.child("username").getValue(String.class);
+//                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
+//                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
+//                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
+//                    String description = dataSnapshot.child("description").getValue(String.class);
+//
+//                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+//                    posts.add(newPost);
+//                    adapter.notifyDataSetChanged();
+//                    Log.d(TAG, "Data added");
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+//
+//
+//        // Update newly added posts to our posts list recycler view.
+//        postQuery.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+////                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
+//                    String postId = dataSnapshot.child("postId").getValue(String.class);
+//                    String userName = dataSnapshot.child("username").getValue(String.class);
+//                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
+//                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
+//                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
+//                    String description = dataSnapshot.child("description").getValue(String.class);
+//                    Log.d(TAG, "Data added");
+//                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+//
+//                    posts.add(newPost);
+//                    adapter.notifyDataSetChanged();
+//                    Log.d(TAG, "Data added");
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
 
     }
 
