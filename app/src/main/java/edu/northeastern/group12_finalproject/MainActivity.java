@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private RecyclerView recyclerView;
     private PostAdapter adapter;
+    ImageButton searchBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,17 @@ public class MainActivity extends AppCompatActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         String username = user.getEmail(); // Use email as username for now
+
+        // Add search function and button listener.
+        searchBtn = findViewById(R.id.search_button);
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
 
         // Query the database for the post with the matching username
         Query query = databaseReference.orderByChild("username").equalTo(username);
