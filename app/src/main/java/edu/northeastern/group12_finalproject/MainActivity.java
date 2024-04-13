@@ -55,6 +55,12 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = auth.getCurrentUser();
         String username = user.getEmail(); // Use email as username for now
 
+        if (user != null) {
+            fetchPostsIncludingOwn();
+        } else {
+            Log.e("MainActivity", "User not logged in.");
+        }
+
 
         // Add search function and button listener.
         searchBtn = findViewById(R.id.search_button);
@@ -72,8 +78,10 @@ public class MainActivity extends AppCompatActivity {
         DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
         // set listener to retrieve data and store userIds from following node into list
         List<String> followingUserIds = new ArrayList<>();
+
         // add current logged in user to "following" list, so their posts are also shown on MainFeed
         followingUserIds.add(currentUserId);
+
         followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -115,16 +123,43 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // method to Fetch all posts, including Posts from currentUser
+    private void fetchPostsIncludingOwn() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+        String currentUserId = user.getUid();
+
+        DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
+        followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> userIds = new ArrayList<>();
+                userIds.add(currentUserId); // Add current user ID to include own posts
+
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    userIds.add(childSnapshot.getKey()); // Add followed user IDs
+                }
+                Log.d("MainActivity", "Current user ID: " + currentUserId);
+                Log.d("MainActivity", "User IDs to fetch posts for: " + userIds);
+                fetchPostsForFollowedUsers(userIds);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("MainActivity", "Database error: " + error.getMessage());
+            }
+        });
+    }
+
     // method to Fetch all posts (Firebase can't handle multiple queries)
     private void fetchPostsForFollowedUsers(List<String> userIds) {
         List<Post> allPosts = new ArrayList<>(); // list to hold all Posts from followed users
         // Initialize Firebase database reference
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("posts");
         AtomicInteger remainingCalls = new AtomicInteger(userIds.size()); // counter for async calls
 
         for (String userId : userIds) {
             Log.d("MainActivity", "Querying for posts with username: " + userId);
-            Query query =  databaseReference.orderByChild("userID").equalTo(userId);
+            Query query =  FirebaseDatabase.getInstance().getReference().child("posts").orderByChild("userID").equalTo(userId);
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
