@@ -162,7 +162,7 @@ public class FollowerActivity extends AppCompatActivity {
     // method to open up home page activity
     // finished current activity to remove from backstack
     private void openHomePage() {
-        Intent intent = new Intent(this, EdiProfileActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish(); // Close current activity
     }

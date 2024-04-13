@@ -97,6 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class));
+                finish();
             }
         });
 
@@ -179,7 +180,7 @@ public class ProfileActivity extends AppCompatActivity {
     // method to open up home page activity
     // finished current activity to remove from backstack
     private void openHomePage() {
-        Intent intent = new Intent(this, EditProfileActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish(); // Close current activity
     }

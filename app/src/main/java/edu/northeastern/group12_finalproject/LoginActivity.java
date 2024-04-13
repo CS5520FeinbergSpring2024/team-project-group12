@@ -53,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
                                         // Display when login is successful.
                                         Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
 
-                                        startActivity(new Intent(LoginActivity.this, EdiProfileActivity.class));
+                                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                         finish();
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {

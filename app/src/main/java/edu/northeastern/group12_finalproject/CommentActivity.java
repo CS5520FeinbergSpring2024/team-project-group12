@@ -217,7 +217,7 @@ public class CommentActivity extends AppCompatActivity {
         super.onBackPressed();
         finish(); // Finish the CommentActivity
         // Start MainActivity again
-        Intent intent = new Intent(this, EdiProfileActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 
