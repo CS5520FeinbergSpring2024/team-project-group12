@@ -6,12 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,6 +44,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         Post post = postList.get(position);
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d("PostAdapter", "Post at position " + position + " loaded: " + post.getPostTitle());
 
         holder.titleTextView.setText(post.getPostTitle());
@@ -66,6 +69,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         Picasso.get()
                 .load(post.getImageUrl())
                 .into(holder.postImage);
+
+        // Set visibility of moreButton based on user ID comparison
+        if (post.getUserID().equals(currentUserId)) {
+            holder.moreButton.setVisibility(View.VISIBLE);
+        } else {
+            holder.moreButton.setVisibility(View.GONE);
+        }
 
         // Set up like button onClickListener
         holder.likeButton.setOnClickListener(new View.OnClickListener() {
@@ -157,6 +167,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         TextView timestamp;
         Button likeButton;
         Button commentButton;
+        ImageButton moreButton;
 
 
         PostViewHolder(@NonNull View itemView) {
@@ -170,6 +181,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             commentsTextView = itemView.findViewById(R.id.comment_count);
             postImage = itemView.findViewById(R.id.image_view);
             timestamp = itemView.findViewById(R.id.time_text_view);
+            moreButton = itemView.findViewById(R.id.morebtn);
 
             likeButton = itemView.findViewById(R.id.like);
             commentButton = itemView.findViewById(R.id.comment);
