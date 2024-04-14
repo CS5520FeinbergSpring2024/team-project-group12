@@ -28,6 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 
 import java.util.ArrayList;
@@ -97,15 +98,17 @@ public class ProfileActivity extends AppCompatActivity {
 //        recyclerView.setAdapter(adapter);
 
         // The profile image
-        circleImageView = findViewById(R.id.profile_image);
-        // Retrieve the profile image URI from the intent
-        if (getIntent() != null && getIntent().hasExtra("imageUri")) {
-            profileImageUri = Uri.parse(getIntent().getStringExtra("imageUri"));
-            // Set the profile image using the received URI
-            if (profileImageUri != null) {
-                circleImageView.setImageURI(profileImageUri);
-            }
-        }
+        retrieveProfilePhoto();
+
+//        circleImageView = findViewById(R.id.profile_image);
+//        // Retrieve the profile image URI from the intent
+//        if (getIntent() != null && getIntent().hasExtra("imageUri")) {
+//            profileImageUri = Uri.parse(getIntent().getStringExtra("imageUri"));
+//            // Set the profile image using the received URI
+//            if (profileImageUri != null) {
+//                circleImageView.setImageURI(profileImageUri);
+//            }
+//        }
 
         // Take you to edit profile page.
         editTv = findViewById(R.id.tvEditProfile);
@@ -372,6 +375,41 @@ public class ProfileActivity extends AppCompatActivity {
                     following_count++;
                 }
                 followingCount.setText(String.valueOf(following_count));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void retrieveProfilePhoto() {
+
+        DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
+        Query query = profileRf.orderByChild("email").equalTo(user.getEmail());
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    if (ds.exists()) {
+                        String profilePhoto = ds.child("profile_photo_Uri").getValue(String.class);
+                        Uri profilePhotoUri = Uri.parse(profilePhoto);
+                        // The profile image
+                        circleImageView = findViewById(R.id.profile_image);
+
+                        Picasso.get()
+                                .load(profilePhoto)
+                                .into(circleImageView);
+//                        profileImageUri = Uri.parse(profilePhoto);
+//
+//                        circleImageView.setImageURI(profileImageUri);
+                    // Load image using Picasso
+//                                Picasso.get()
+//                                .load(post.getImageUrl())
+//                                .into(holder.postImage);
+                    }
+                }
             }
 
             @Override
