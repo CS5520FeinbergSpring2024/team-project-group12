@@ -24,6 +24,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
@@ -177,16 +179,61 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     private void deletePost(String postId, int position, Context context) {
         DatabaseReference postRef = FirebaseDatabase.getInstance().getReference().child("posts").child(postId);
-        postRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    // Remove the post from the list and update the adapter
-                    postList.remove(position);
-                    notifyItemRemoved(position);
-                    Toast.makeText(context.getApplicationContext(), "Post deleted successfully", Toast.LENGTH_SHORT).show();
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Post post = snapshot.getValue(Post.class);
+                    if (post != null) {
+                        int activeMinutes = post.getActiveMinutes();
+                        float distance = post.getDistance();
+
+                        // Now delete the post
+                        postRef.removeValue().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                // Decrement user data
+                                updateUserData(post.getUserID(), -activeMinutes, -distance);
+                                // Remove the post from the list and update the adapter
+                                postList.remove(position);
+                                notifyItemRemoved(position);
+                                Toast.makeText(context.getApplicationContext(), "Post deleted successfully", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(context.getApplicationContext(), "Failed to delete post", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 } else {
-                    Toast.makeText(context.getApplicationContext(), "Failed to delete post", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context.getApplicationContext(), "Post not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("Firebase", "Failed to fetch post data", error.toException());
+            }
+        });
+    }
+    private void updateUserData(String userId, int minutesChange, float distanceChange) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+        userRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Users user = mutableData.getValue(Users.class);
+                if (user != null) {
+                    user.setActiveMinutes(user.getActiveMinutes() + minutesChange);
+                    user.setDistance(user.getDistance() + distanceChange);
+                    mutableData.setValue(user);
+                }
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
+                if (!committed) {
+                    Log.e("Firebase", "User data update failed", databaseError.toException());
+                } else {
+                    Log.d("Firebase", "User data updated successfully");
                 }
             }
         });
