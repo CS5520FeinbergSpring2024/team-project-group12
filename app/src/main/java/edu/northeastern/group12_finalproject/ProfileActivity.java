@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -32,6 +33,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class ProfileActivity extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
@@ -55,6 +58,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ProgressBar progBar;
     private List<Post> posts;
+    CircleImageView circleImageView;
+    Uri profileImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +95,17 @@ public class ProfileActivity extends AppCompatActivity {
 //        // Set up adapter
 //        adapter = new PostAdapter(posts);
 //        recyclerView.setAdapter(adapter);
+
+        // The profile image
+        circleImageView = findViewById(R.id.profile_image);
+        // Retrieve the profile image URI from the intent
+        if (getIntent() != null && getIntent().hasExtra("imageUri")) {
+            profileImageUri = Uri.parse(getIntent().getStringExtra("imageUri"));
+            // Set the profile image using the received URI
+            if (profileImageUri != null) {
+                circleImageView.setImageURI(profileImageUri);
+            }
+        }
 
         // Take you to edit profile page.
         editTv = findViewById(R.id.tvEditProfile);

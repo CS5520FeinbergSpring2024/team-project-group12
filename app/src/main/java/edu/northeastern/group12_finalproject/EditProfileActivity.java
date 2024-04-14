@@ -3,18 +3,24 @@ package edu.northeastern.group12_finalproject;
 import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthResult;
@@ -27,6 +33,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.util.UUID;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -38,6 +51,12 @@ public class EditProfileActivity extends AppCompatActivity {
     EditText nameET;
     EditText newPassword;
     Button confirmBtn, exitBtn;
+    CircleImageView profileImage;
+    TextView  changeImage;
+    Uri imageUri;
+    FirebaseStorage storage;
+    StorageReference storageReference;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +73,9 @@ public class EditProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int exitCode = retrieveFirebaseInfo();
                 if (exitCode == 0) {
-                    startActivity(new Intent(EditProfileActivity.this, ProfileActivity.class));
+                    Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
+                    intent.putExtra("imageUri", imageUri.toString());
+                    startActivity(intent);
                     finish();
                 }
                 else if (exitCode == 1) {
@@ -75,6 +96,53 @@ public class EditProfileActivity extends AppCompatActivity {
                 finish();
             }
         });
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
+        profileImage = findViewById(R.id.profile_image_change);
+        changeImage = findViewById(R.id.change_profile_image_btn);
+        changeImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectImage();
+            }
+        });
+
+    }
+
+    private void selectImage() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1 && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            imageUri = data.getData();
+            profileImage.setImageURI(imageUri);
+            uploadImage();
+        }
+    }
+
+    private void uploadImage() {
+        final String randomKey = UUID.randomUUID().toString();
+        StorageReference riverRef = storageReference.child("profiles/" + randomKey);
+        riverRef.putFile(imageUri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Snackbar.make(findViewById(android.R.id.content), "Image uploaded", Snackbar.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), "Failed to Upload", Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     // Retrieve user info from firebase.
