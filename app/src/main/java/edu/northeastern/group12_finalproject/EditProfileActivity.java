@@ -2,6 +2,8 @@ package edu.northeastern.group12_finalproject;
 
 import static android.content.ContentValues.TAG;
 
+import static java.security.AccessController.getContext;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -165,7 +167,7 @@ public class EditProfileActivity extends AppCompatActivity {
 //
 //        } else {
             // Permission already granted or not required, open gallery to choose picture
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             intent.setType("image/*");
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -191,6 +193,9 @@ public class EditProfileActivity extends AppCompatActivity {
         if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
             // Image selected successfully, handle it here
             imageUri = data.getData();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                getContentResolver().takePersistableUriPermission(imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            }
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 bitmap = rotateImageIfRequired(bitmap, imageUri);
