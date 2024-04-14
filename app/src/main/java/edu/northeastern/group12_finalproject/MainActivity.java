@@ -54,14 +54,7 @@ public class MainActivity extends AppCompatActivity {
         // Query the database for the post with the current user's username
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        String username = user.getEmail(); // Use email as username for now
-
-        if (user != null) {
-            fetchPostsIncludingOwn();
-        } else {
-            Log.e("MainActivity", "User not logged in.");
-        }
-
+        String loggedInUserId = user.getUid();
 
         // Add search function and button listener.
         searchBtn = findViewById(R.id.search_button);
@@ -78,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         String currentUserId = user.getUid();
         DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
         // set listener to retrieve data and store userIds from following node into list
-        List<String> followingUserIds = new ArrayList<>();
+        List<String> feedIds = new ArrayList<>();
 
         followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -86,11 +79,12 @@ public class MainActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                         String userId = childSnapshot.getKey(); // get userId from key
-                        followingUserIds.add(userId);
+                        feedIds.add(userId);
                     }
-                    Log.d("MainActivity", "Following User IDs: " + followingUserIds);
-                    if (!followingUserIds.isEmpty()) {
-                        fetchPostsForFollowedUsers(followingUserIds);
+                    Log.d("MainActivity", "Following User IDs: " + feedIds);
+                    feedIds.add(loggedInUserId); // add id of logged in user
+                    if (!feedIds.isEmpty()) {
+                        fetchPostsForFeed(feedIds);
                     } else {
                         Toast.makeText(MainActivity.this, "You are not following anyone yet!", Toast.LENGTH_LONG).show();
                     }
@@ -139,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Log.d("MainActivity", "Current user ID: " + currentUserId);
                 Log.d("MainActivity", "User IDs to fetch posts for: " + userIds);
-                fetchPostsForFollowedUsers(userIds);
+                fetchPostsForFeed(userIds);
             }
 
             @Override
@@ -149,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // method to Fetch all posts (Firebase can't handle multiple queries)
-    private void fetchPostsForFollowedUsers(List<String> userIds) {
+    // method to Fetch all posts
+    private void fetchPostsForFeed(List<String> userIds) {
         List<Post> allPosts = new ArrayList<>(); // list to hold all Posts from followed users
         // Initialize Firebase database reference
         AtomicInteger remainingCalls = new AtomicInteger(userIds.size()); // counter for async calls
@@ -215,14 +209,6 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    // Method to create dummy posts
-    private List<Post> createDummyPosts() {
-        List<Post> posts = new ArrayList<>();
-        // Create and add dummy posts
-        posts.add(new Post("1", "User1", "userID1", System.currentTimeMillis(), "image_url1", "Title1", "Description1", 10, 1.5f));
-        posts.add(new Post("2", "User2", "userID2", System.currentTimeMillis(), "image_url2", "Title2", "Description2", 20, 2.5f));
-        return posts;
-    }
 }
 
 // OLD QUERY LOGIC
