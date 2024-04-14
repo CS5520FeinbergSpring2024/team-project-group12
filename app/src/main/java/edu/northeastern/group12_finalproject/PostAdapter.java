@@ -59,8 +59,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         int activeMinutes = post.getActiveMinutes();
         holder.activeMinutesTextView.setText("Active Minutes: " + String.valueOf(activeMinutes));
         holder.distanceTextView.setText("Total Distance: " + String.valueOf(post.getDistance()));
-        holder.likesTextView.setText(String.valueOf(post.getLikes()) + " likes");
         holder.timestamp.setText(post.getTimestampDifference());
+
+        // Set the initial like count
+        if (post.getLikes() != null) {
+            int initialLikes = 0;
+            for (Boolean value : post.getLikes().values()) {
+                if (Boolean.TRUE.equals(value)) {
+                    initialLikes++;
+                }
+            }
+            holder.likesTextView.setText(initialLikes + " likes");
+        } else {
+            holder.likesTextView.setText("0 likes");
+        }
 
         // Check if comments list is not null before accessing its size
         if (post.getComments() != null) {
@@ -89,34 +101,30 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             public void onClick(View view) {
                 // Implement like functionality here
                 DatabaseReference postRef = FirebaseDatabase.getInstance().getReference().child("posts").child(post.getPostId());
+                String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Assuming you have Firebase Auth setup
+                DatabaseReference likesRef = FirebaseDatabase.getInstance().getReference().child("posts").child(post.getPostId()).child("likes").child(currentUserId);
 
-                postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                // Check if the current user has liked the post
+                likesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            Post firebasePost = snapshot.getValue(Post.class);
-                            if (firebasePost != null) {
-                                if (firebasePost.isLiked()) {
-                                    // Unlike the post
-                                    firebasePost.setLiked(false);
-                                    firebasePost.decrementLikes();
-                                } else {
-                                    // Like the post
-                                    firebasePost.setLiked(true);
-                                    firebasePost.incrementLikes();
-                                }
-                                // Update like count and like status in Firebase
-                                postRef.child("likes").setValue(firebasePost.getLikes());
-                                postRef.child("liked").setValue(firebasePost.isLiked());
-                                // Update local UI
-                                holder.likesTextView.setText(String.valueOf(firebasePost.getLikes()) + " likes");
-                            }
+                        boolean isCurrentlyLiked = snapshot.exists() && snapshot.getValue(Boolean.class);
+
+                        if (isCurrentlyLiked) {
+                            // User has liked this post, now remove like
+                            likesRef.removeValue(); // Remove this user's like
+                        } else {
+                            // User has not liked this post, now add like
+                            likesRef.setValue(true); // Set this user's like to true
                         }
+
+                        // After updating Firebase, update UI locally (might be better to use Firebase event listeners to listen to changes)
+                        updateLikesDisplay(post.getPostId(), holder.likesTextView);
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("PostAdapter", "Error fetching post data from Firebase: " + error.getMessage());
+                        Log.e("PostAdapter", "Failed to read like status", error.toException());
                     }
                 });
             }
@@ -180,6 +188,30 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 } else {
                     Toast.makeText(context.getApplicationContext(), "Failed to delete post", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+    }
+
+    // This function updates the number of likes displayed in the UI
+    private void updateLikesDisplay(String postId, TextView likesTextView) {
+        DatabaseReference postLikesRef = FirebaseDatabase.getInstance().getReference().child("posts").child(postId).child("likes");
+        postLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int likeCount = 0;
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    Boolean isLiked = childSnapshot.getValue(Boolean.class);
+                    if (Boolean.TRUE.equals(isLiked)) {
+                        likeCount++;
+                    }
+                }
+                likesTextView.setText(likeCount + " likes");
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("PostAdapter", "Failed to count likes", error.toException());
             }
         });
     }
