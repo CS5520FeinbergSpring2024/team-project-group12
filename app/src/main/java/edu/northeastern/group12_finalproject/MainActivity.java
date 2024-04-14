@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private PostAdapter adapter;
     ImageButton searchBtn;
+    List<String> feedIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         String currentUserId = user.getUid();
         DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
         // set listener to retrieve data and store userIds from following node into list
-        List<String> feedIds = new ArrayList<>();
+        feedIds = new ArrayList<>();
 
         followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -81,13 +82,16 @@ public class MainActivity extends AppCompatActivity {
                         String userId = childSnapshot.getKey(); // get userId from key
                         feedIds.add(userId);
                     }
+                    feedIds.add(currentUserId);
                     Log.d("MainActivity", "Following User IDs: " + feedIds);
-                    feedIds.add(loggedInUserId); // add id of logged in user
                     if (!feedIds.isEmpty()) {
                         fetchPostsForFeed(feedIds);
                     } else {
                         Toast.makeText(MainActivity.this, "You are not following anyone yet!", Toast.LENGTH_LONG).show();
                     }
+                } else {
+                    feedIds.add(currentUserId);
+                    fetchPostsForFeed(feedIds);
                 }
             }
 
@@ -111,34 +115,6 @@ public class MainActivity extends AppCompatActivity {
                     openProfilePage();
                 }
                 return false;
-            }
-        });
-    }
-
-    // method to Fetch all posts, including Posts from currentUser
-    private void fetchPostsIncludingOwn() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser user = auth.getCurrentUser();
-        String currentUserId = user.getUid();
-
-        DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
-        followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<String> userIds = new ArrayList<>();
-                userIds.add(currentUserId); // Add current user ID to include own posts
-
-                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                    userIds.add(childSnapshot.getKey()); // Add followed user IDs
-                }
-                Log.d("MainActivity", "Current user ID: " + currentUserId);
-                Log.d("MainActivity", "User IDs to fetch posts for: " + userIds);
-                fetchPostsForFeed(userIds);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("MainActivity", "Database error: " + error.getMessage());
             }
         });
     }
