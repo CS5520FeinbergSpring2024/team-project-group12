@@ -1,5 +1,7 @@
 package edu.northeastern.group12_finalproject;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,10 +11,14 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -141,7 +147,43 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 view.getContext().startActivity(intent);
             }
         });
+
+        holder.moreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Show confirmation dialog
+                new AlertDialog.Builder(holder.itemView.getContext())
+                        .setTitle("Delete Post")
+                        .setMessage("Are you sure you want to delete this post?")
+                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deletePost(post.getPostId(), position, holder.itemView.getContext());
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            }
+        });
     }
+
+    private void deletePost(String postId, int position, Context context) {
+        DatabaseReference postRef = FirebaseDatabase.getInstance().getReference().child("posts").child(postId);
+        postRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    // Remove the post from the list and update the adapter
+                    postList.remove(position);
+                    notifyItemRemoved(position);
+                    Toast.makeText(context.getApplicationContext(), "Post deleted successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context.getApplicationContext(), "Failed to delete post", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 
     @Override
     public int getItemCount() {
