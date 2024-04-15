@@ -140,8 +140,10 @@ public class FollowingActivity extends AppCompatActivity {
                 for (DataSnapshot sp : snapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: found following:" + sp.getValue());
                     String uid = sp.child("uid").getValue().toString();
+//                    String profileU = returnProfileUrl();
                     // Add to the myUserList.
                     Users currUser = sp.getValue(Users.class);
+//                    currUser.setProfileImageUrl(profileU);
 
 //                    currUser.setProfileImageUrl();
                     myUserList.add(currUser);
@@ -156,27 +158,27 @@ public class FollowingActivity extends AppCompatActivity {
         });
     }
 
-//    private String returnProfileUrl() {
-//        String profileUrl = "";
-//        DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
-//        Query query = profileRf.orderByChild("email").equalTo(user.getEmail());
-//        query.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                for (DataSnapshot ds : snapshot.getChildren()) {
-//                    if (ds.exists()) {
-//                        profileUrl = ds.child("profile_photo_Uri").getValue(String.class);
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
-//        return profileUrl;
-//    }
+    private String returnProfileUrl() {
+        final String[] profileUrl = {""};
+        DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
+        Query query = profileRf.orderByChild("email").equalTo(user.getEmail());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    if (ds.exists()) {
+                        profileUrl[0] = ds.child("profile_photo_Uri").getValue().toString();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return profileUrl[0];
+    }
 
 
 
