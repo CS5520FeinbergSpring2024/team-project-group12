@@ -264,6 +264,14 @@ public class EditProfileActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Image uploaded successfully, now get the download URL
+                        riverRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri downloadUri) {
+                                // Save the download URL to Firebase Realtime Database
+                                saveImageUrlToDatabase(downloadUri.toString());
+                            }
+                        });
                         Snackbar.make(findViewById(android.R.id.content), "Image uploaded", Snackbar.LENGTH_LONG).show();
 
                         DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
@@ -310,6 +318,15 @@ public class EditProfileActivity extends AppCompatActivity {
 
     }
 
+    private void saveImageUrlToDatabase(String imageUrl) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId);
+            userRef.child("profileImageUrl").setValue(imageUrl);
+        }
+    }
+
     // Retrieve user info from firebase.
     private int retrieveFirebaseInfo() {
         firebaseAuth = FirebaseAuth.getInstance();
@@ -341,6 +358,13 @@ public class EditProfileActivity extends AppCompatActivity {
                     }
                     if (!(newPassword.getText().toString().isEmpty())) {
                         firebaseAuth.getCurrentUser().updatePassword(newPassword.getText().toString());
+                    }
+                    // Upload profile image if imageUri is not null
+                    if (imageUri != null) {
+                        uploadImage();
+                    } else {
+                        // If no image is selected, finish the activity
+                        finish();
                     }
                 }
             }
