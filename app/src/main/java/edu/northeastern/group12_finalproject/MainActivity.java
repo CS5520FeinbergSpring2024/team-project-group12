@@ -25,14 +25,17 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collections;
+
 
 public class MainActivity extends AppCompatActivity {
-
 
     private DatabaseReference databaseReference;
     private RecyclerView recyclerView;
     private PostAdapter adapter;
     ImageButton searchBtn;
+    List<String> feedIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // set the adapter:
+        adapter = new PostAdapter(new ArrayList<>());
+        recyclerView.setAdapter(adapter);
 
         // Initialize Firebase database reference
         databaseReference = FirebaseDatabase.getInstance().getReference().child("posts");
@@ -49,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         // Query the database for the post with the current user's username
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        String username = user.getEmail(); // Use email as username for now
+        String loggedInUserId = user.getUid();
 
         // Add search function and button listener.
         searchBtn = findViewById(R.id.search_button);
@@ -62,32 +68,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Query the database for the post with the matching username
-        Query query = databaseReference.orderByChild("username").equalTo(username);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Query the database for the posts from userIds that the current user is following
+        String currentUserId = user.getUid();
+        DatabaseReference followingRef = FirebaseDatabase.getInstance().getReference().child("following").child(currentUserId);
+        // set listener to retrieve data and store userIds from following node into list
+        feedIds = new ArrayList<>();
+
+        followingRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    // Post found, populate RecyclerView with the queried post
-                    List<Post> posts = new ArrayList<>();
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        Post post = snapshot.getValue(Post.class);
-                        posts.add(post);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                        String userId = childSnapshot.getKey(); // get userId from key
+                        feedIds.add(userId);
                     }
-                    adapter = new PostAdapter(posts);
-                    recyclerView.setAdapter(adapter);
+                    feedIds.add(currentUserId);
+                    Log.d("MainActivity", "Following User IDs: " + feedIds);
+                    if (!feedIds.isEmpty()) {
+                        fetchPostsForFeed(feedIds);
+                    } else {
+                        Toast.makeText(MainActivity.this, "You are not following anyone yet!", Toast.LENGTH_LONG).show();
+                    }
                 } else {
-                    // No post found for the current user
-                    Toast.makeText(MainActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
+                    feedIds.add(currentUserId);
+                    fetchPostsForFeed(feedIds);
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle database error
-                Log.e("MainActivity", "Database error: " + databaseError.getMessage());
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("MainActivity", "Database error: " + error.getMessage());
             }
         });
+
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
@@ -106,6 +119,47 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // method to Fetch all posts
+    private void fetchPostsForFeed(List<String> userIds) {
+        List<Post> allPosts = new ArrayList<>(); // list to hold all Posts from followed users
+        // Initialize Firebase database reference
+        AtomicInteger remainingCalls = new AtomicInteger(userIds.size()); // counter for async calls
+
+        for (String userId : userIds) {
+            Log.d("MainActivity", "Querying for posts with username: " + userId);
+            Query query =  FirebaseDatabase.getInstance().getReference().child("posts")
+                    .orderByChild("userID")
+                    .equalTo(userId);
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                            Post post = postSnapshot.getValue(Post.class);
+                            Log.d("MainActivity", "Post fetched: " + post.getPostTitle());
+                            allPosts.add(post);
+                        }
+                    }
+                    // check if all queries are done
+                    if (remainingCalls.decrementAndGet() == 0) {
+                        // Sort posts by timestamp in descending order (to show newest Posts at top of feed)
+                        Collections.sort(allPosts, (post1, post2) -> Long.compare(post2.getTimestamp(), post1.getTimestamp()));
+                        // ensure that updates to RecyclerView are happening on the main thread
+                        runOnUiThread(() -> {
+                            Log.d("MainActivity", "Updating RecyclerView with posts");
+                            adapter.updateData(allPosts); // Assuming you have a method to update data in your adapter
+                            adapter.notifyDataSetChanged(); // Notify the adapter of the dataset change
+                        });
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("MainActivity", "Database error on post fetch: " + error.getMessage());
+                }
+            });
+        }
+    }
 
     // method to open up home page activity
     // finished current activity to remove from backstack
@@ -131,12 +185,33 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    // Method to create dummy posts
-    private List<Post> createDummyPosts() {
-        List<Post> posts = new ArrayList<>();
-        // Create and add dummy posts
-        posts.add(new Post("1", "User1", System.currentTimeMillis(), "image_url1", "Title1", "Description1", 10, 1.5f));
-        posts.add(new Post("2", "User2", System.currentTimeMillis(), "image_url2", "Title2", "Description2", 20, 2.5f));
-        return posts;
-    }
 }
+
+// OLD QUERY LOGIC
+
+//    // Query the database for the post with the matching username
+//    Query query = databaseReference.orderByChild("username").equalTo(username);
+//    query.addListenerForSingleValueEvent(new ValueEventListener() {
+//        @Override
+//        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//            if (dataSnapshot.exists()) {
+//            // Post found, populate RecyclerView with the queried post
+//            List<Post> posts = new ArrayList<>();
+//            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//            Post post = snapshot.getValue(Post.class);
+//            posts.add(post);
+//            }
+//            adapter = new PostAdapter(posts);
+//            recyclerView.setAdapter(adapter);
+//            } else {
+//            // No post found for the current user
+//            Toast.makeText(MainActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//
+//    @Override
+//    public void onCancelled(@NonNull DatabaseError databaseError) {
+//        // Handle database error
+//        Log.e("MainActivity", "Database error: " + databaseError.getMessage());
+//        }
+//        });

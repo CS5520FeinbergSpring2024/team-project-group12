@@ -1,21 +1,31 @@
 package edu.northeastern.group12_finalproject;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
@@ -42,6 +52,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
         Post post = postList.get(position);
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.d("PostAdapter", "Post at position " + position + " loaded: " + post.getPostTitle());
 
         holder.titleTextView.setText(post.getPostTitle());
@@ -50,8 +61,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         int activeMinutes = post.getActiveMinutes();
         holder.activeMinutesTextView.setText("Active Minutes: " + String.valueOf(activeMinutes));
         holder.distanceTextView.setText("Total Distance: " + String.valueOf(post.getDistance()));
-        holder.likesTextView.setText(String.valueOf(post.getLikes()) + " likes");
         holder.timestamp.setText(post.getTimestampDifference());
+
+        // Set the initial like count
+        if (post.getLikes() != null) {
+            int initialLikes = 0;
+            for (Boolean value : post.getLikes().values()) {
+                if (Boolean.TRUE.equals(value)) {
+                    initialLikes++;
+                }
+            }
+            holder.likesTextView.setText(initialLikes + " likes");
+        } else {
+            holder.likesTextView.setText("0 likes");
+        }
 
         // Check if comments list is not null before accessing its size
         if (post.getComments() != null) {
@@ -67,40 +90,43 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 .load(post.getImageUrl())
                 .into(holder.postImage);
 
+        // Set visibility of moreButton based on user ID comparison
+        if (post.getUserID().equals(currentUserId)) {
+            holder.moreButton.setVisibility(View.VISIBLE);
+        } else {
+            holder.moreButton.setVisibility(View.GONE);
+        }
+
         // Set up like button onClickListener
         holder.likeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Implement like functionality here
                 DatabaseReference postRef = FirebaseDatabase.getInstance().getReference().child("posts").child(post.getPostId());
+                String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Assuming you have Firebase Auth setup
+                DatabaseReference likesRef = FirebaseDatabase.getInstance().getReference().child("posts").child(post.getPostId()).child("likes").child(currentUserId);
 
-                postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                // Check if the current user has liked the post
+                likesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            Post firebasePost = snapshot.getValue(Post.class);
-                            if (firebasePost != null) {
-                                if (firebasePost.isLiked()) {
-                                    // Unlike the post
-                                    firebasePost.setLiked(false);
-                                    firebasePost.decrementLikes();
-                                } else {
-                                    // Like the post
-                                    firebasePost.setLiked(true);
-                                    firebasePost.incrementLikes();
-                                }
-                                // Update like count and like status in Firebase
-                                postRef.child("likes").setValue(firebasePost.getLikes());
-                                postRef.child("liked").setValue(firebasePost.isLiked());
-                                // Update local UI
-                                holder.likesTextView.setText(String.valueOf(firebasePost.getLikes()) + " likes");
-                            }
+                        boolean isCurrentlyLiked = snapshot.exists() && snapshot.getValue(Boolean.class);
+
+                        if (isCurrentlyLiked) {
+                            // User has liked this post, now remove like
+                            likesRef.removeValue(); // Remove this user's like
+                        } else {
+                            // User has not liked this post, now add like
+                            likesRef.setValue(true); // Set this user's like to true
                         }
+
+                        // After updating Firebase, update UI locally (might be better to use Firebase event listeners to listen to changes)
+                        updateLikesDisplay(post.getPostId(), holder.likesTextView);
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e("PostAdapter", "Error fetching post data from Firebase: " + error.getMessage());
+                        Log.e("PostAdapter", "Failed to read like status", error.toException());
                     }
                 });
             }
@@ -131,11 +157,123 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 view.getContext().startActivity(intent);
             }
         });
+
+        holder.moreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Show confirmation dialog
+                new AlertDialog.Builder(holder.itemView.getContext())
+                        .setTitle("Delete Post")
+                        .setMessage("Are you sure you want to delete this post?")
+                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deletePost(post.getPostId(), position, holder.itemView.getContext());
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+            }
+        });
     }
+
+    private void deletePost(String postId, int position, Context context) {
+        DatabaseReference postRef = FirebaseDatabase.getInstance().getReference().child("posts").child(postId);
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Post post = snapshot.getValue(Post.class);
+                    if (post != null) {
+                        int activeMinutes = post.getActiveMinutes();
+                        float distance = post.getDistance();
+
+                        // Now delete the post
+                        postRef.removeValue().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                // Decrement user data
+                                updateUserData(post.getUserID(), -activeMinutes, -distance);
+                                // Remove the post from the list and update the adapter
+                                postList.remove(position);
+                                notifyItemRemoved(position);
+                                Toast.makeText(context.getApplicationContext(), "Post deleted successfully", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(context.getApplicationContext(), "Failed to delete post", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                } else {
+                    Toast.makeText(context.getApplicationContext(), "Post not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("Firebase", "Failed to fetch post data", error.toException());
+            }
+        });
+    }
+    private void updateUserData(String userId, int minutesChange, float distanceChange) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+        userRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Users user = mutableData.getValue(Users.class);
+                if (user != null) {
+                    user.setActiveMinutes(user.getActiveMinutes() + minutesChange);
+                    user.setDistance(user.getDistance() + distanceChange);
+                    mutableData.setValue(user);
+                }
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
+                if (!committed) {
+                    Log.e("Firebase", "User data update failed", databaseError.toException());
+                } else {
+                    Log.d("Firebase", "User data updated successfully");
+                }
+            }
+        });
+    }
+
+    // This function updates the number of likes displayed in the UI
+    private void updateLikesDisplay(String postId, TextView likesTextView) {
+        DatabaseReference postLikesRef = FirebaseDatabase.getInstance().getReference().child("posts").child(postId).child("likes");
+        postLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int likeCount = 0;
+                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                    Boolean isLiked = childSnapshot.getValue(Boolean.class);
+                    if (Boolean.TRUE.equals(isLiked)) {
+                        likeCount++;
+                    }
+                }
+                likesTextView.setText(likeCount + " likes");
+            }
+
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("PostAdapter", "Failed to count likes", error.toException());
+            }
+        });
+    }
+
 
     @Override
     public int getItemCount() {
         return postList.size();
+    }
+
+    // Method to update the data in your adapter
+    public void updateData(List<Post> newPosts) {
+        postList.clear(); // Clear the existing data
+        postList.addAll(newPosts); // Add the new data
+        notifyDataSetChanged(); // Notify the adapter that the data set has changed
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -150,6 +288,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         TextView timestamp;
         Button likeButton;
         Button commentButton;
+        ImageButton moreButton;
 
 
         PostViewHolder(@NonNull View itemView) {
@@ -163,6 +302,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             commentsTextView = itemView.findViewById(R.id.comment_count);
             postImage = itemView.findViewById(R.id.image_view);
             timestamp = itemView.findViewById(R.id.time_text_view);
+            moreButton = itemView.findViewById(R.id.morebtn);
 
             likeButton = itemView.findViewById(R.id.like);
             commentButton = itemView.findViewById(R.id.comment);

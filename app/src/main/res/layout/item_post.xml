@@ -135,25 +135,27 @@
 
             <Button
                 android:id="@+id/like"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:autoLink="all"
-                android:background="@color/Pistachio"
+                android:backgroundTint="@color/hunter_green"
                 android:drawableLeft="@drawable/baseline_exposure_plus_1_24"
                 android:padding="5dp"
-                android:text="Like" />
+                android:text="Like"
+                style="@style/Widget.MaterialComponents.Button"/>
 
             <Button
                 android:id="@+id/comment"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:autoLink="all"
-                android:background="@color/Pistachio"
+                android:backgroundTint="@color/hunter_green"
                 android:drawableLeft="@drawable/baseline_add_comment_24"
                 android:padding="5dp"
-                android:text="Comment" />
+                android:text="Comment"
+                style="@style/Widget.MaterialComponents.Button"/>
 
         </LinearLayout>
 

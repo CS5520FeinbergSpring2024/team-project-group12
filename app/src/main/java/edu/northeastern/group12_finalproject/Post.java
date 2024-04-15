@@ -9,18 +9,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Post {
 
     private String postId; // unique identifier for Post in database
     private String username;
+    private String userID;
     private long timestamp;
     private String imageUrl;
     private String postTitle;
     private String description;
     private int activeMinutes;
     private float distance;
-    private int likes;
+    private Map<String, Boolean> likes;
     private HashMap<String, Comment> comments;
     private boolean liked;
 
@@ -31,19 +33,18 @@ public class Post {
         //this.comments = new ArrayList<>(); // initialize comments as empty array
     }
     // Constructor with imageUrl parameter
-    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int activeMinutes, float distance) {
+    public Post(String postId, String username, String userID, long timestamp, String imageUrl, String postTitle, String description, int activeMinutes, float distance) {
         this.postId = postId;
         this.username = username;
+        this.userID = userID;
         this.timestamp = timestamp;
         this.imageUrl = imageUrl;
         this.postTitle = postTitle;
         this.description = description;
         this.activeMinutes = activeMinutes;
         this.distance = distance;
-        this.likes = 0;
-        // note: when initialized as an empty array, the comments field doesnt show up in Realtime DB.
-        // But adding a comment upon initialization includes comments field in the DB correctly
-        this.comments = new HashMap<>(); // Initialize comments as an empty list if comments is null
+        this.likes = new HashMap<>();
+        this.comments = new HashMap<>();
     }
 
     // getters and setters
@@ -61,6 +62,14 @@ public class Post {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
     public long getTimestamp() {
@@ -112,16 +121,12 @@ public class Post {
         this.distance = distance;
     }
 
-    public int getLikes() {
+    public Map<String, Boolean> getLikes() {
         return likes;
     }
 
-    public void incrementLikes() {
-        likes++;
-    }
-
-    public void decrementLikes() {
-        likes--;
+    public void setLikes(Map<String, Boolean> likes) {
+        this.likes = likes;
     }
 
     public void addComment(Comment comment) {
@@ -134,14 +139,6 @@ public class Post {
 
     public HashMap<String, Comment> getComments() {
         return comments;
-    }
-
-    public boolean isLiked() {
-        return liked;
-    }
-
-    public void setLiked(boolean liked) {
-        this.liked = liked;
     }
 
     public String getTimestampDifference() {

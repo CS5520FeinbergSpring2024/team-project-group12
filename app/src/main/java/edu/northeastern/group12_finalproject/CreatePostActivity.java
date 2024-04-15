@@ -31,8 +31,13 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -67,7 +72,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private DatabaseReference postsRef;
-    // Permissions Constants
+    private DatabaseReference usersRef;
     // Permissions Constants
     private static final int PERMISSION_REQUEST = 0;
     private static final int PERMISSION_REQUEST_READ_MEDIA_IMAGES = 1;
@@ -363,11 +368,12 @@ public class CreatePostActivity extends AppCompatActivity {
         // get username of user who posts:
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
-        // temporarily use email instead of Username, because Profile set up not yet implemented
+        String userID = user.getUid();
+        // Changed for a Post to be uploaded with userID to make querying the DB for Followers' Posts easier
         String username = user.getEmail();
 
         // create and return Post object
-        return new Post("postId", username, System.currentTimeMillis(), null, title, description, totalDuration, postDistance);
+        return new Post("postId", username, userID, System.currentTimeMillis(), null, title, description, totalDuration, postDistance);
     }
 
     /**
@@ -427,6 +433,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                     @Override
                                                     public void onSuccess(Void unused) {
+                                                        updateUserData(post.getUserID(), post.getActiveMinutes(), post.getDistance()); // update user
                                                         // Hide progress bar after successful upload
                                                         pb.setVisibility(View.INVISIBLE);
                                                         Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
@@ -492,6 +499,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {
+                                                updateUserData(post.getUserID(), post.getActiveMinutes(), post.getDistance());
                                                 // Hide progress bar after successful upload
                                                 pb.setVisibility(View.INVISIBLE);
                                                 Toast.makeText(CreatePostActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
@@ -524,6 +532,33 @@ public class CreatePostActivity extends AppCompatActivity {
             // Hide progress bar if no image selected
             pb.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private void updateUserData(String userId, int additionalMinutes, float additionalDistance) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+        userRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Users user = mutableData.getValue(Users.class);
+                if (user != null) {
+                    // Increment user's activity data
+                    user.setActiveMinutes(user.getActiveMinutes() + additionalMinutes);
+                    user.setDistance(user.getDistance() + additionalDistance);
+                    mutableData.setValue(user);
+                }
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
+                if (!committed) {
+                    Log.e("Firebase", "User data update failed", databaseError.toException());
+                } else {
+                    Log.d("Firebase", "User data updated successfully");
+                }
+            }
+        });
     }
 
 

@@ -281,6 +281,7 @@ public class ProfileActivity extends AppCompatActivity {
         Query query = databaseReference.orderByChild("username").equalTo(username);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
+
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     // Post found, populate RecyclerView with the queried post
