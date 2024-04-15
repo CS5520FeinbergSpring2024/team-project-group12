@@ -339,9 +339,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Users viewingUser = ds.getValue(Users.class);
                     viewProfileName.setText(viewingUser.getEmail());
-                    viewProfileBio.setText("Active Minutes: " + currUser.getActiveMinutes() + " minutes \n"
-                            + "Distance: " + currUser.getDistance() + " miles\n");
-                    displayNameTv.setText(currUser.getUsername());
+                    viewProfileBio.setText("Active Minutes: " + viewingUser.getActiveMinutes() + " minutes \n"
+                            + "Distance: " + viewingUser.getDistance() + " miles\n");
                     displayNameTv.setText(viewingUser.getUsername());
 
                     String url = ds.child("profileImageUrl").getValue(String.class);
