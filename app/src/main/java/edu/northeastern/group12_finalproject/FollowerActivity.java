@@ -141,9 +141,35 @@ public class FollowerActivity extends AppCompatActivity {
 
                 for (DataSnapshot sp : snapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: found following:" + sp.getValue());
-//                    String uid = sp.child("uid").getValue().toString();
+                    String uid = sp.child("uid").getValue().toString();
+                    retrieveUsers(uid);
+//                    String profileU = returnProfileUrl();
                     // Add to the myUserList.
-                    Users currUser = sp.getValue(Users.class);
+//                    Users currUser = sp.getValue(Users.class);
+//                    currUser.setProfileImageUrl(profileU);
+
+//                    currUser.setProfileImageUrl();
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void retrieveUsers(String uid) {
+
+        Query q = FirebaseDatabase.getInstance().getReference().child("Users").orderByChild("uid").equalTo(uid);
+
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds: snapshot.getChildren()) {
+                    Users currUser = ds.getValue(Users.class);
                     myUserList.add(currUser);
                     updateUserList();
                 }
