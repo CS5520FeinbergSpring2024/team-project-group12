@@ -355,8 +355,6 @@ public class ViewProfileActivity extends AppCompatActivity {
                                     .into(circleImageView);
                         }
                     }
-
-
                 }
 
             }
