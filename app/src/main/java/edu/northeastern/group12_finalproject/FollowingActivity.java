@@ -28,6 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +142,8 @@ public class FollowingActivity extends AppCompatActivity {
                     String uid = sp.child("uid").getValue().toString();
                     // Add to the myUserList.
                     Users currUser = sp.getValue(Users.class);
+
+//                    currUser.setProfileImageUrl();
                     myUserList.add(currUser);
                     updateUserList();
                 }
@@ -152,6 +155,28 @@ public class FollowingActivity extends AppCompatActivity {
             }
         });
     }
+
+//    private String returnProfileUrl() {
+//        String profileUrl = "";
+//        DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
+//        Query query = profileRf.orderByChild("email").equalTo(user.getEmail());
+//        query.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot ds : snapshot.getChildren()) {
+//                    if (ds.exists()) {
+//                        profileUrl = ds.child("profile_photo_Uri").getValue(String.class);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+//        return profileUrl;
+//    }
 
 
 

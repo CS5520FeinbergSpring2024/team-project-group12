@@ -307,11 +307,11 @@ public class EditProfileActivity extends AppCompatActivity {
                     public void onSuccess(Void unused) {
 //                                        // Hide progress bar after successful upload
 //                                        pb.setVisibility(View.INVISIBLE);
-                        Toast.makeText(EditProfileActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditProfileActivity.this, "New profile image is here!", Toast.LENGTH_SHORT).show();
                         // navigate back to the MainFeed
-                        Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                        startActivity(intent);
-                        finish();
+//                        Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
+//                        startActivity(intent);
+//                        finish();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -335,11 +335,11 @@ public class EditProfileActivity extends AppCompatActivity {
 
         // Initial View set up.
         if ((nameET.getText().toString().trim().isEmpty())
-                && (newPassword.getText().toString().trim().isEmpty()) && (imageUri == null)) {
+                && (newPassword.getText().toString().trim().isEmpty())) {
             return 1;
         }
 
-        if (newPassword.getText().toString().length() < 6) {
+        else if (((newPassword.getText().toString().trim().isEmpty())) && (newPassword.getText().toString().length() < 6)) {
 //            Toast.makeText(EditProfileActivity.this, "New password should be at least 6 characters", Toast.LENGTH_LONG);
             return 2;
         }
@@ -377,7 +377,7 @@ public class EditProfileActivity extends AppCompatActivity {
         DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
         user = FirebaseAuth.getInstance().getCurrentUser();
         Query query = profileRf.orderByChild("email").equalTo(user.getEmail());
-        query.addValueEventListener(new ValueEventListener() {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot ds : snapshot.getChildren()) {

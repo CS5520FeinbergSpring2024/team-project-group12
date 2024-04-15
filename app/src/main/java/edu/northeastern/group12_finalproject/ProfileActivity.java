@@ -50,6 +50,8 @@ public class ProfileActivity extends AppCompatActivity {
     TextView displayNameTv;
     TextView bio;
     TextView editTv;
+    TextView postNum;
+    int num_posts = 0;
 
     TextView followedCount, followingCount;
     RecyclerView recyclerView;
@@ -77,6 +79,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.profileRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        postNum = findViewById(R.id.tvPostNum);
 
         posts = new ArrayList<>();
 
@@ -244,10 +248,16 @@ public class ProfileActivity extends AppCompatActivity {
                     // The profile image
                     circleImageView = findViewById(R.id.profile_image);
 
-                    Picasso.get()
-                            .load(url)
-                            .into(circleImageView);
+                    Log.d(TAG, "The current profile image url is " + url + " for " + currUser.getEmail());
+//                    Uri profilePhotoUri = Uri.parse(url);
 
+                    if ((url != null)) {
+                        if (!(url.equals("0"))) {
+                            Picasso.get()
+                                    .load(url)
+                                    .into(circleImageView);
+                        }
+                    }
                 }
             }
 
@@ -260,6 +270,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Retrieve user posts.
     private void retrievePosts() {
+        num_posts = 0;
         // Get reference to the posts database.
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("posts");
         String username = user.getEmail();
@@ -275,11 +286,13 @@ public class ProfileActivity extends AppCompatActivity {
                     // Post found, populate RecyclerView with the queried post
                     List<Post> posts = new ArrayList<>();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        num_posts++;
                         Post post = snapshot.getValue(Post.class);
                         posts.add(post);
                     }
 
                     // Increment active minutes
+                    postNum.setText(String.valueOf(num_posts));
 
                     adapter = new PostAdapter(posts);
                     recyclerView.setAdapter(adapter);

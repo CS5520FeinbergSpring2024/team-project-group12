@@ -51,6 +51,8 @@ public class ViewProfileActivity extends AppCompatActivity {
     TextView viewProfileBio;
     TextView tvFollow, tvUnfollow;
     CircleImageView circleImageView;
+    TextView postNum;
+    int num_posts = 0;
 
     PostAdapter adapter;
 
@@ -69,7 +71,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
 //        RecyclerView recyclerView = findViewById(R.id.viewProfileRecyclerView);
 //        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+        postNum = findViewById(R.id.tvPostNum);
 
         posts = new ArrayList<>();
 
@@ -352,7 +354,6 @@ public class ViewProfileActivity extends AppCompatActivity {
                                     .load(url)
                                     .into(circleImageView);
                         }
-                        
                     }
 
 
@@ -384,9 +385,12 @@ public class ViewProfileActivity extends AppCompatActivity {
                     // Post found, populate RecyclerView with the queried post
                     List<Post> posts = new ArrayList<>();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        num_posts++;
                         Post post = snapshot.getValue(Post.class);
                         posts.add(post);
                     }
+
+                    postNum.setText(String.valueOf(num_posts));
                     adapter = new PostAdapter(posts);
                     recyclerView.setAdapter(adapter);
                 } else {

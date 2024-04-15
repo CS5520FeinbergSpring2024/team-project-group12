@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -52,6 +54,16 @@ public class UserListAdapter extends ArrayAdapter<Users> {
 
         holder.username.setText(myUsers.get(position).getUsername());
         holder.email.setText(getItem(position).getEmail());
+        if ((myUsers.get(position).getProfileImageUrl() != null)) {
+            if (!(myUsers.get(position).getProfileImageUrl().equals("0"))) {
+                Picasso.get()
+                        .load(myUsers.get(position).getProfileImageUrl())
+                        .into(holder.profileImage);
+            }
+        }
+        else {
+            holder.profileImage.setImageResource(R.drawable.profile_avocado);
+        }
 
         return convertView;
     }
