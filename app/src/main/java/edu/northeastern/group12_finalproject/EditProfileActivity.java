@@ -63,6 +63,7 @@ public class EditProfileActivity extends AppCompatActivity {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     private Bitmap capturedBitmap;
+    String uploadedUrl = "";
 
     EditText nameET;
     EditText newPassword;
@@ -269,7 +270,8 @@ public class EditProfileActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(Uri downloadUri) {
                                 // Save the download URL to Firebase Realtime Database
-                                saveImageUrlToDatabase(downloadUri.toString());
+                                uploadedUrl = downloadUri.toString();
+//                                saveImageUrlToDatabase(downloadUri.toString());
                             }
                         });
                         Snackbar.make(findViewById(android.R.id.content), "Image uploaded", Snackbar.LENGTH_LONG).show();
@@ -290,6 +292,7 @@ public class EditProfileActivity extends AppCompatActivity {
             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId);
             userRef.child("profileImageUrl").setValue(imageUrl);
         }
+
         DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
 
 //                        // generate unique key for post
@@ -331,15 +334,20 @@ public class EditProfileActivity extends AppCompatActivity {
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("Users");
 
+        if (!(uploadedUrl.equals(""))) {
+            saveImageUrlToDatabase(uploadedUrl);
+            return 0;
+        }
+
         Log.d(TAG, "Inside retrieve FirebaseInfo");
 
         // Initial View set up.
-        if ((nameET.getText().toString().trim().isEmpty())
-                && (newPassword.getText().toString().trim().isEmpty())) {
-            return 1;
-        }
+//        if ((nameET.getText().toString().trim().isEmpty())
+//                && (newPassword.getText().toString().trim().isEmpty()) && imageUri!=null) {
+//            return 1;
+//        }
 
-        else if (((newPassword.getText().toString().trim().isEmpty())) && (newPassword.getText().toString().length() < 6)) {
+        if (!((newPassword.getText().toString().trim().isEmpty())) && (newPassword.getText().toString().length() < 6)) {
 //            Toast.makeText(EditProfileActivity.this, "New password should be at least 6 characters", Toast.LENGTH_LONG);
             return 2;
         }
