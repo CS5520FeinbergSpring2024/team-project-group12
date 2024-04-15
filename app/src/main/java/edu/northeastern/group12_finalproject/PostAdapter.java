@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
@@ -33,6 +34,8 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
@@ -175,6 +178,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                         .show();
             }
         });
+        // Load profile photo to posts.
+        retrieveProfilePhoto(post.getUserID(), holder.profilePhoto);
     }
 
     private void deletePost(String postId, int position, Context context) {
@@ -290,6 +295,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         Button commentButton;
         ImageButton moreButton;
 
+        // Adding pictureTV to show profile photo
+        CircleImageView profilePhoto;
 
         PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -307,6 +314,35 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             likeButton = itemView.findViewById(R.id.like);
             commentButton = itemView.findViewById(R.id.comment);
 
+            // Adding pictureTV to show profile photo
+            profilePhoto = itemView.findViewById(R.id.picturetv);
         }
+    }
+
+    private void retrieveProfilePhoto(String uid, CircleImageView photo) {
+
+        Query q = FirebaseDatabase.getInstance().getReference().child("Users").orderByChild("uid").equalTo(uid);
+
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds: snapshot.getChildren()) {
+                    Users currUser = ds.getValue(Users.class);
+                    String url = currUser.getProfileImageUrl();
+                    if ((url != null)) {
+                        if (!(url.equals("0"))) {
+                            Picasso.get()
+                                    .load(url)
+                                    .into(photo);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }
