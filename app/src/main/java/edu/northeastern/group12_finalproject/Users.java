@@ -15,13 +15,14 @@ public class Users implements Parcelable {
     private double activeMinutes;
     private double distance;
     private String uid;
+    private String profileImageUrl;
 
 
     // constructor
     public Users() {
     }
     // Constructor with imageUrl parameter
-    public Users(String bio, String username, String email, int following, int followed, String uid, double activeMinutes, double distance) {
+    public Users(String bio, String username, String email, int following, int followed, String uid, double activeMinutes, double distance, String profileImageUrl) {
         this.bio = bio;
         this.username = username;
         this.email = email;
@@ -30,6 +31,7 @@ public class Users implements Parcelable {
         this.uid = uid;
         this.activeMinutes = activeMinutes;
         this.distance = distance;
+        this.profileImageUrl = profileImageUrl;
     }
 
     protected Users(Parcel in) {
@@ -41,6 +43,7 @@ public class Users implements Parcelable {
         uid = in.readString();
         activeMinutes = in.readDouble();
         distance = in.readDouble();
+        profileImageUrl = in.readString();
     }
 
     public static final Creator<Users> CREATOR = new Creator<Users>() {
@@ -115,6 +118,14 @@ public class Users implements Parcelable {
         this.uid = uid;
     }
 
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -134,5 +145,6 @@ public class Users implements Parcelable {
         dest.writeString(uid);
         dest.writeDouble(activeMinutes);
         dest.writeDouble(distance);
+        dest.writeString(profileImageUrl);
     }
 }

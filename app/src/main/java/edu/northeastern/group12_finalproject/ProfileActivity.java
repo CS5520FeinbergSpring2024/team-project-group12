@@ -7,18 +7,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,8 +30,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+
 import java.util.ArrayList;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -48,14 +50,21 @@ public class ProfileActivity extends AppCompatActivity {
     TextView displayNameTv;
     TextView bio;
     TextView editTv;
+    TextView postNum;
+    int num_posts = 0;
 
     TextView followedCount, followingCount;
+    RecyclerView recyclerView;
 
     PostAdapter adapter;
     private Users currSentUser;
 
     private ProgressBar progBar;
     private List<Post> posts;
+    private double activeMinutes = 0.0;
+    private double distance = 0.0;
+    CircleImageView circleImageView;
+    Uri profileImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +79,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.profileRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        postNum = findViewById(R.id.tvPostNum);
 
         posts = new ArrayList<>();
 
@@ -88,9 +99,22 @@ public class ProfileActivity extends AppCompatActivity {
         getFollowerCount();
         getFollowingCount();
 
-        // Set up adapter
-        adapter = new PostAdapter(posts);
-        recyclerView.setAdapter(adapter);
+//        // Set up adapter
+//        adapter = new PostAdapter(posts);
+//        recyclerView.setAdapter(adapter);
+
+        // The profile image
+//        retrieveProfilePhoto();
+
+//        circleImageView = findViewById(R.id.profile_image);
+//        // Retrieve the profile image URI from the intent
+//        if (getIntent() != null && getIntent().hasExtra("imageUri")) {
+//            profileImageUri = Uri.parse(getIntent().getStringExtra("imageUri"));
+//            // Set the profile image using the received URI
+//            if (profileImageUri != null) {
+//                circleImageView.setImageURI(profileImageUri);
+//            }
+//        }
 
         // Take you to edit profile page.
         editTv = findViewById(R.id.tvEditProfile);
@@ -98,6 +122,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class));
+                finish();
             }
         });
 
@@ -215,19 +240,24 @@ public class ProfileActivity extends AppCompatActivity {
                     Users currUser = dataSnapshot.getValue(Users.class);
                     currSentUser = currUser;
                     profileName.setText(currUser.getEmail());
-                    bio.setText(currUser.getBio());
+                    bio.setText("Active Minutes: " + currUser.getActiveMinutes() + " minutes \n"
+                            + "Distance: " + currUser.getDistance() + " miles\n");
                     displayNameTv.setText(currUser.getUsername());
-//                    followedCount.setText(String.valueOf(currUser.getFollowed()));
-//                    followingCount.setText(String.valueOf(currUser.getFollowing()));
-//                    // Retrieve data
-//                    String name = "" + dataSnapshot.child("username").getValue();
-//                    String bioData = "" + dataSnapshot.child("bio").getValue();
-//                    String email = "" + dataSnapshot.child("email").getValue();
-//
-//                    // Set data to textView.
-//                    profileName.setText(email);
-//                    displayNameTv.setText(name);
-//                    bio.setText(bioData);
+                    String url = dataSnapshot.child("profileImageUrl").getValue(String.class);
+//                    Uri profilePhotoUri = Uri.parse(url);
+                    // The profile image
+                    circleImageView = findViewById(R.id.profile_image);
+
+                    Log.d(TAG, "The current profile image url is " + url + " for " + currUser.getEmail());
+//                    Uri profilePhotoUri = Uri.parse(url);
+
+                    if ((url != null)) {
+                        if (!(url.equals("0"))) {
+                            Picasso.get()
+                                    .load(url)
+                                    .into(circleImageView);
+                        }
+                    }
                 }
             }
 
@@ -240,66 +270,100 @@ public class ProfileActivity extends AppCompatActivity {
 
     // Retrieve user posts.
     private void retrievePosts() {
+        num_posts = 0;
         // Get reference to the posts database.
-        postsDatabaseReference = firebaseDatabase.getReference("posts");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("posts");
+        String username = user.getEmail();
 
-        // Use email as the identifier.
-        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(user.getEmail());
-        // Get one child.
-        postQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+        recyclerView = findViewById(R.id.profileRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // Query the database for the post with the matching username
+        Query query = databaseReference.orderByChild("username").equalTo(username);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-                    String postId = dataSnapshot.child("postId").getValue(String.class);
-                    String userName = dataSnapshot.child("username").getValue(String.class);
-                    String userID = dataSnapshot.child("userID").getValue(String.class);
-                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
-                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
-                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
-                    String description = dataSnapshot.child("description").getValue(String.class);
 
-                    Post newPost = new Post(postId, userName, userID, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
-                    posts.add(newPost);
-                    adapter.notifyDataSetChanged();
-                    Log.d(TAG, "Data added");
-                }
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Post found, populate RecyclerView with the queried post
+                    List<Post> posts = new ArrayList<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        num_posts++;
+                        Post post = snapshot.getValue(Post.class);
+                        posts.add(post);
+                    }
 
-            }
+                    // Increment active minutes
+                    postNum.setText(String.valueOf(num_posts));
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-
-        // Update newly added posts to our posts list recycler view.
-        postQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
-//                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
-                    String postId = dataSnapshot.child("postId").getValue(String.class);
-                    String userName = dataSnapshot.child("username").getValue(String.class);
-                    String userID = dataSnapshot.child("userID").getValue(String.class);
-                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
-                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
-                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
-                    String description = dataSnapshot.child("description").getValue(String.class);
-                    Log.d(TAG, "Data added");
-                    Post newPost = new Post(postId, userName, userID, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
-
-                    posts.add(newPost);
-                    adapter.notifyDataSetChanged();
-                    Log.d(TAG, "Data added");
+                    adapter = new PostAdapter(posts);
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    // No post found for the current user
+                    Toast.makeText(ProfileActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle database error
+                Log.e("MainActivity", "Database error: " + databaseError.getMessage());
             }
         });
+//        // Use email as the identifier.
+//        Query postQuery = usersDatabaseReference.orderByChild("username").equalTo(user.getEmail());
+//        // Get one child.
+//        postQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+//                    String postId = dataSnapshot.child("postId").getValue(String.class);
+//                    String userName = dataSnapshot.child("username").getValue(String.class);
+//                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
+//                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
+//                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
+//                    String description = dataSnapshot.child("description").getValue(String.class);
+//
+//                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+//                    posts.add(newPost);
+//                    adapter.notifyDataSetChanged();
+//                    Log.d(TAG, "Data added");
+//                }
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
+//
+//
+//        // Update newly added posts to our posts list recycler view.
+//        postQuery.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                for (DataSnapshot dataSnapshot: snapshot.getChildren()) {
+////                    public Post(String postId, String username, long timestamp, String imageUrl, String postTitle, String description, int active_minutes, float distance) {
+//                    String postId = dataSnapshot.child("postId").getValue(String.class);
+//                    String userName = dataSnapshot.child("username").getValue(String.class);
+//                    String postTitle = dataSnapshot.child("postTitle").getValue(String.class);
+//                    String imageUrl = dataSnapshot.child("imageUrl").getValue(String.class);
+//                    Float distance = dataSnapshot.child("distance").getValue(Float.class);
+//                    String description = dataSnapshot.child("description").getValue(String.class);
+//                    Log.d(TAG, "Data added");
+//                    Post newPost = new Post(postId, userName, System.currentTimeMillis(), imageUrl, postTitle, description, 10, distance);
+//
+//                    posts.add(newPost);
+//                    adapter.notifyDataSetChanged();
+//                    Log.d(TAG, "Data added");
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//
+//            }
+//        });
 
     }
 
@@ -339,6 +403,41 @@ public class ProfileActivity extends AppCompatActivity {
                     following_count++;
                 }
                 followingCount.setText(String.valueOf(following_count));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void retrieveProfilePhoto() {
+
+        DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
+        Query query = profileRf.orderByChild("email").equalTo(user.getEmail());
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    if (ds.exists()) {
+                        String profilePhoto = ds.child("profile_photo_Uri").getValue(String.class);
+                        Uri profilePhotoUri = Uri.parse(profilePhoto);
+                        // The profile image
+                        circleImageView = findViewById(R.id.profile_image);
+
+                        Picasso.get()
+                                .load(profilePhoto)
+                                .into(circleImageView);
+//                        profileImageUri = Uri.parse(profilePhoto);
+//
+//                        circleImageView.setImageURI(profileImageUri);
+                    // Load image using Picasso
+//                                Picasso.get()
+//                                .load(post.getImageUrl())
+//                                .into(holder.postImage);
+                    }
+                }
             }
 
             @Override

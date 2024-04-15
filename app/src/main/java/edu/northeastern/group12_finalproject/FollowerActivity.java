@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,6 +36,7 @@ public class FollowerActivity extends AppCompatActivity {
     // Widgets.
     private TextView followerTV;
     private ListView nameListView;
+    private ImageView exitImage;
     private ProgressBar progressBar;
 
     // Name list for the searched users.
@@ -57,6 +59,8 @@ public class FollowerActivity extends AppCompatActivity {
         followerTV = findViewById(R.id.followerTV);
         nameListView = (ListView) findViewById(R.id.lvfollower);
         progressBar = findViewById(R.id.followerProgressBar);
+        exitImage = findViewById(R.id.exit);
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         // Get the user that's being viewed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -71,6 +75,14 @@ public class FollowerActivity extends AppCompatActivity {
         followingIDs = new ArrayList<>();
         showFollowing();
         progressBar.setVisibility(View.GONE);
+
+        exitImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FollowerActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
 
         Log.d(TAG, "FOLLOWING! outside thread " + followingIDs);
 
@@ -129,9 +141,35 @@ public class FollowerActivity extends AppCompatActivity {
 
                 for (DataSnapshot sp : snapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: found following:" + sp.getValue());
-//                    String uid = sp.child("uid").getValue().toString();
+                    String uid = sp.child("uid").getValue().toString();
+                    retrieveUsers(uid);
+//                    String profileU = returnProfileUrl();
                     // Add to the myUserList.
-                    Users currUser = sp.getValue(Users.class);
+//                    Users currUser = sp.getValue(Users.class);
+//                    currUser.setProfileImageUrl(profileU);
+
+//                    currUser.setProfileImageUrl();
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void retrieveUsers(String uid) {
+
+        Query q = FirebaseDatabase.getInstance().getReference().child("Users").orderByChild("uid").equalTo(uid);
+
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds: snapshot.getChildren()) {
+                    Users currUser = ds.getValue(Users.class);
                     myUserList.add(currUser);
                     updateUserList();
                 }

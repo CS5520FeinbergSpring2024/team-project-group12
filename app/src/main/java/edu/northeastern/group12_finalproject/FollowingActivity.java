@@ -9,13 +9,12 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -29,8 +28,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import org.checkerframework.checker.units.qual.A;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +36,7 @@ import java.util.List;
 public class FollowingActivity extends AppCompatActivity {
     // Widgets.
     private TextView followingTV;
+    private ImageView exitImage;
     private ListView nameListView;
     private ProgressBar progressBar;
 
@@ -61,6 +60,8 @@ public class FollowingActivity extends AppCompatActivity {
         followingTV = findViewById(R.id.followerTV);
         nameListView = (ListView) findViewById(R.id.lvfollowing);
         progressBar = findViewById(R.id.followingProgressBar);
+        exitImage = findViewById(R.id.exit);
+
         user = FirebaseAuth.getInstance().getCurrentUser();
         // Get the user that's being viewed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -76,7 +77,13 @@ public class FollowingActivity extends AppCompatActivity {
         showFollowing();
         progressBar.setVisibility(View.GONE);
 
-        Log.d(TAG, "FOLLOWING! outside thread " + followingIDs);
+        exitImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FollowingActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
 
 
 
@@ -133,8 +140,33 @@ public class FollowingActivity extends AppCompatActivity {
                 for (DataSnapshot sp : snapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: found following:" + sp.getValue());
                     String uid = sp.child("uid").getValue().toString();
+                    retrieveUsers(uid);
+//                    String profileU = returnProfileUrl();
                     // Add to the myUserList.
-                    Users currUser = sp.getValue(Users.class);
+//                    Users currUser = sp.getValue(Users.class);
+//                    currUser.setProfileImageUrl(profileU);
+
+//                    currUser.setProfileImageUrl();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void retrieveUsers(String uid) {
+
+        Query q = FirebaseDatabase.getInstance().getReference().child("Users").orderByChild("uid").equalTo(uid);
+
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds: snapshot.getChildren()) {
+                    Users currUser = ds.getValue(Users.class);
                     myUserList.add(currUser);
                     updateUserList();
                 }
@@ -145,6 +177,28 @@ public class FollowingActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private String returnProfileUrl() {
+        final String[] profileUrl = {""};
+        DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
+        Query query = profileRf.orderByChild("email").equalTo(user.getEmail());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    if (ds.exists()) {
+                        profileUrl[0] = ds.child("profile_photo_Uri").getValue().toString();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return profileUrl[0];
     }
 
 

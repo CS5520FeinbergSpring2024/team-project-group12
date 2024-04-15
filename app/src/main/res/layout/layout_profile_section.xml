@@ -1,59 +1,59 @@
-<merge xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<?xml version="1.0" encoding="utf-8"?>
 
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white">
 
         <!--Top toolbar-->
         <RelativeLayout
+            android:id="@+id/relLayout1"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/relLayout1">
+            android:layout_height="50dp">
 
-        <include layout="@layout/snippet_top_profilebar"
-            android:id="@+id/top_navigation_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent" />
+            <include
+                android:id="@+id/top_navigation_bar"
+                layout="@layout/snippet_top_profilebar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent" />
         </RelativeLayout>
+
 
         <!--    Middle Section-->
         <RelativeLayout
+            android:id="@+id/relLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/relLayout1"
-            android:id="@+id/relLayout2"
             android:background="@drawable/pistachio_border_bottom">
 
             <LinearLayout
+                android:id="@+id/linLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:id="@+id/linLayout"
                 android:weightSum="100">
 
                 <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="25"
-                    android:layout_marginStart="25dp">
+                    android:layout_marginStart="25dp"
+                    android:layout_weight="25">
 
                     <!-- Profile photo -->
-<!--                    <ImageView-->
-<!--                        android:layout_width="80dp"-->
-<!--                        android:layout_height="80dp"/>-->
+                    <!--                    <ImageView-->
+                    <!--                        android:layout_width="80dp"-->
+                    <!--                        android:layout_height="80dp"/>-->
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/profile_image"
-                        android:src="@drawable/baseline_person_24"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/profile_avocado"
                         app:civ_border_color="@color/Pistachio"
-                        app:civ_border_width="2dp"
-                        android:layout_centerVertical="true"/>
+                        app:civ_border_width="2dp" />
 
                 </RelativeLayout>
 
@@ -61,11 +61,11 @@
                 <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="75"
                     android:layout_marginStart="30dp"
-                    android:layout_marginEnd="30dp">
+                    android:layout_marginEnd="30dp"
+                    android:layout_weight="75">
 
-                    <include layout="@layout/profile_follow_info"/>
+                    <include layout="@layout/profile_follow_info" />
 
                 </RelativeLayout>
 
@@ -73,52 +73,35 @@
 
             <!-- User name and description -->
             <LinearLayout
+                android:id="@+id/linLayout2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_below="@+id/linLayout"
-                android:id="@+id/linLayout2"
+                android:orientation="vertical"
                 android:padding="20dp">
 
                 <!-- User display name-->
                 <TextView
+                    android:id="@+id/display_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/display_name"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
                     android:text="Test Android"
-                    android:textSize="16sp"/>
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <!--Bio description-->
                 <TextView
+                    android:id="@+id/bio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/bio"
-                    android:textColor="@color/black"
+                    android:layout_marginTop="5dp"
                     android:text="My bio"
-                    android:textSize="16sp"
-                    android:layout_marginTop="5dp"/>
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
             </LinearLayout>
-            
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/relLayout3"
-                android:layout_below="@+id/linLayout2"
-                android:layout_marginBottom="50dp">
 
-                <!-- Reuse item post design -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/profileRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp" />
-
-<!--                <include layout="@layout/item_post"/>-->
-
-            </RelativeLayout>
 
         </RelativeLayout>
     </RelativeLayout>
-</merge>
 

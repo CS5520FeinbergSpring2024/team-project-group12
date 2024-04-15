@@ -6,20 +6,38 @@
     android:layout_height="match_parent"
     tools:context=".ProfileActivity">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
         <!-- Include the Top Navigation Bar layout -->
-        <include layout="@layout/layout_view_profile_section" />
+
+        <!-- Include the Top Navigation Bar layout -->
+        <include layout="@layout/layout_view_profile_section"
+            android:id="@+id/layout_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent" />
+
 
         <ProgressBar
+            android:id="@+id/profileProgressBar"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:id="@+id/profileProgressBar"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="100dp"/>
+            android:layout_marginTop="100dp"
+            app:layout_constraintTop_toBottomOf="@+id/layout_profile"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
 
-    </RelativeLayout>
+
+        <!-- Reuse item post design -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/viewProfileRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/layout_profile"
+            app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
 
 
 
