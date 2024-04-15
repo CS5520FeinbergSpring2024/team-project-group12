@@ -59,6 +59,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ProgressBar progBar;
     private List<Post> posts;
+    private double activeMinutes = 0.0;
+    private double distance = 0.0;
     CircleImageView circleImageView;
     Uri profileImageUri;
 
@@ -98,7 +100,7 @@ public class ProfileActivity extends AppCompatActivity {
 //        recyclerView.setAdapter(adapter);
 
         // The profile image
-        retrieveProfilePhoto();
+//        retrieveProfilePhoto();
 
 //        circleImageView = findViewById(R.id.profile_image);
 //        // Retrieve the profile image URI from the intent
@@ -237,6 +239,15 @@ public class ProfileActivity extends AppCompatActivity {
                     bio.setText("Active Minutes: " + currUser.getActiveMinutes() + " minutes \n"
                             + "Distance: " + currUser.getDistance() + " miles\n");
                     displayNameTv.setText(currUser.getUsername());
+                    String url = dataSnapshot.child("profileImageUrl").getValue(String.class);
+//                    Uri profilePhotoUri = Uri.parse(url);
+                    // The profile image
+                    circleImageView = findViewById(R.id.profile_image);
+
+                    Picasso.get()
+                            .load(url)
+                            .into(circleImageView);
+
                 }
             }
 
@@ -267,6 +278,9 @@ public class ProfileActivity extends AppCompatActivity {
                         Post post = snapshot.getValue(Post.class);
                         posts.add(post);
                     }
+
+                    // Increment active minutes
+
                     adapter = new PostAdapter(posts);
                     recyclerView.setAdapter(adapter);
                 } else {

@@ -51,7 +51,7 @@
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:layout_centerVertical="true"
-                        android:src="@drawable/baseline_person_24"
+                        android:src="@drawable/profile_avocado"
                         app:civ_border_color="@color/Pistachio"
                         app:civ_border_width="2dp" />
 

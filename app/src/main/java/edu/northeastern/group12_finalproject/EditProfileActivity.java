@@ -273,39 +273,6 @@ public class EditProfileActivity extends AppCompatActivity {
                             }
                         });
                         Snackbar.make(findViewById(android.R.id.content), "Image uploaded", Snackbar.LENGTH_LONG).show();
-
-                        DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
-
-//                        // generate unique key for post
-//                        post.setPostId(user.getUid());
-                        HashMap<String, String> imageMap = new HashMap<>();
-                        imageMap.put("profile_photo_Uri", imageUri.toString());
-                        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                        String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                        imageMap.put("uid", uid);
-                        imageMap.put("email", email);
-                        // save the post to the Realtime DB using key
-                        profileReference.child(uid).setValue(imageMap)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void unused) {
-//                                        // Hide progress bar after successful upload
-//                                        pb.setVisibility(View.INVISIBLE);
-                                        Toast.makeText(EditProfileActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
-                                        // navigate back to the MainFeed
-                                        Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-//                                        // Hide progress bar after upload failure
-//                                        pb.setVisibility(View.INVISIBLE);
-                                        Toast.makeText(EditProfileActivity.this, "Failed to post.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -314,8 +281,6 @@ public class EditProfileActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Failed to Upload", Toast.LENGTH_LONG).show();
                     }
                 });
-
-
     }
 
     private void saveImageUrlToDatabase(String imageUrl) {
@@ -325,6 +290,38 @@ public class EditProfileActivity extends AppCompatActivity {
             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId);
             userRef.child("profileImageUrl").setValue(imageUrl);
         }
+        DatabaseReference profileReference = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
+
+//                        // generate unique key for post
+//                        post.setPostId(user.getUid());
+        HashMap<String, String> imageMap = new HashMap<>();
+        imageMap.put("profile_photo_Uri", imageUrl);
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        imageMap.put("uid", uid);
+        imageMap.put("email", email);
+        // save the post to the Realtime DB using key
+        profileReference.child(uid).setValue(imageMap)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+//                                        // Hide progress bar after successful upload
+//                                        pb.setVisibility(View.INVISIBLE);
+                        Toast.makeText(EditProfileActivity.this, "Post saved!", Toast.LENGTH_SHORT).show();
+                        // navigate back to the MainFeed
+                        Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+//                                        // Hide progress bar after upload failure
+//                                        pb.setVisibility(View.INVISIBLE);
+                        Toast.makeText(EditProfileActivity.this, "Failed to post.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     // Retrieve user info from firebase.

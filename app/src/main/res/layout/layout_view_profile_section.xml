@@ -48,7 +48,7 @@
                     <!--                        android:layout_height="80dp"/>-->
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/profile_image"
-                        android:src="@drawable/baseline_person_24"
+                        android:src="@drawable/profile_avocado"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         app:civ_border_color="@color/Pistachio"

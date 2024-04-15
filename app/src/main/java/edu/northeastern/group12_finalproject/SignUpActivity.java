@@ -78,7 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 String email = user.getEmail();
                                 String uid = user.getUid();
 
-                                Users newUser = new Users("Active Minutes: 0\nDistance: 0", name, email, 0, 0, uid, 0, 0);
+                                Users newUser = new Users("Active Minutes: 0\nDistance: 0", name, email, 0, 0, uid, 0, 0, "0");
 
                                 // When user is registered store user info in firebase realtime.
 

@@ -94,7 +94,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         retrievePosts();
 
         // retrieve profile photo
-        retrieveProfilePhoto();
+//        retrieveProfilePhoto();
 
         followingCount = findViewById(R.id.tvFollowingNum);
         followedCount = findViewById(R.id.tvFollowerNum);
@@ -329,6 +329,8 @@ public class ViewProfileActivity extends AppCompatActivity {
         displayNameTv = findViewById(R.id.display_name);
         followedCount = findViewById(R.id.tvFollowerNum);
         followingCount = findViewById(R.id.tvFollowingNum);
+        circleImageView = findViewById(R.id.profile_image);
+
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -339,24 +341,23 @@ public class ViewProfileActivity extends AppCompatActivity {
                             + "Distance: " + currUser.getDistance() + " miles\n");
                     displayNameTv.setText(currUser.getUsername());
                     displayNameTv.setText(viewingUser.getUsername());
-//                    followedCount.setText(String.valueOf(viewingUser.getFollowed()));
-//                    followingCount.setText(String.valueOf(viewingUser.getFollowing()));
+
+                    String url = ds.child("profileImageUrl").getValue(String.class);
+                    Log.d(TAG, "The current profile image url is " + url + " for " + viewingUser.getEmail());
+//                    Uri profilePhotoUri = Uri.parse(url);
+
+                    if ((url != null)) {
+                        if (!(url.equals("0"))) {
+                            Picasso.get()
+                                    .load(url)
+                                    .into(circleImageView);
+                        }
+                        
+                    }
+
+
                 }
-//                if (dataSnapshot.exists()) {
-//                    String email = dataSnapshot.child("email").getValue(String.class);
-//                    String bio = dataSnapshot.child("bio").getValue(String.class);
-//                    String username = dataSnapshot.child("username").getValue(String.class);
-//                    // Set the retrieved information to the corresponding TextViews
-//                    if (email != null) {
-//                        viewProfileName.setText(email);
-//                    }
-//                    if (bio != null) {
-//                        viewProfileBio.setText(bio);
-//                    }
-//                    if (username != null) {
-//                        displayNameTv.setText(username);
-//                    }
-//                }
+
             }
 
             @Override
@@ -430,32 +431,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 //        });
 
     }
-//
-//    // Write the logic to return following and followed count. Index 0: following. Index1: followed.
-//    private int[] getUserFollowCount(String userID) {
-//        int[] result = new int[2];
-//        result[0] = 0;
-//        result[1] = 0;
-//        // Get a query based on uid.
-//        Query query = firebaseDatabase.getReference("Users").orderByChild("uid").equalTo(userID);
-//        query.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                for (DataSnapshot ds: snapshot.getChildren()) {
-//                    String folCount = ds.child("following").getValue().toString();
-//                    String foedCount = ds.child("followed").getValue().toString();
-//                    result[0] = Integer.valueOf(folCount);
-//                    result[1] = Integer.valueOf(foedCount);
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//
-//            }
-//        });
-//        return result;
-//    }
+
 
     private void retrieveProfilePhoto() {
         DatabaseReference profileRf = FirebaseDatabase.getInstance().getReference().child("profilePhoto");
