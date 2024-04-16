@@ -366,7 +366,7 @@ public class ViewProfileActivity extends AppCompatActivity {
                     } else if (activeMinutes >= 200) {
                         badgeDisplay.setText("Badge: Beginner");
                     } else {
-                        badgeDisplay.setText("Badge: No Badge yet!"); // No badge earned yet
+                        badgeDisplay.setText("Badge: No Badge Yet!"); // No badge earned yet
                     }
                 }
 
