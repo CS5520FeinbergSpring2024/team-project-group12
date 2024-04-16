@@ -27,6 +27,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -323,6 +324,7 @@ public class ViewProfileActivity extends AppCompatActivity {
 
     // Retrieve user info from firebase.
     private void retrieveFirebaseInfo() {
+        DecimalFormat distanceFormat = new DecimalFormat("#.##");
         usersDatabaseReference = firebaseDatabase.getReference("Users");
         Query query = usersDatabaseReference.orderByChild("uid").equalTo(viewUser.getUid());
         // Initial View set up.
@@ -339,8 +341,8 @@ public class ViewProfileActivity extends AppCompatActivity {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
                     Users viewingUser = ds.getValue(Users.class);
                     viewProfileName.setText(viewingUser.getEmail());
-                    viewProfileBio.setText("Active Minutes: " + viewingUser.getActiveMinutes() + " minutes \n"
-                            + "Distance: " + viewingUser.getDistance() + " miles\n");
+                    viewProfileBio.setText("Total Minutes Logged: " + viewingUser.getActiveMinutes() + " minutes \n"
+                            + "Total Miles Logged: " + distanceFormat.format(viewingUser.getDistance())  + " miles\n");
                     displayNameTv.setText(viewingUser.getUsername());
 
                     String url = ds.child("profileImageUrl").getValue(String.class);
