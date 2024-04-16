@@ -334,6 +334,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         followedCount = findViewById(R.id.tvFollowerNum);
         followingCount = findViewById(R.id.tvFollowingNum);
         circleImageView = findViewById(R.id.profile_image);
+        TextView badgeDisplay = findViewById(R.id.badge); // Reference to the badge TextView
 
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -355,6 +356,17 @@ public class ViewProfileActivity extends AppCompatActivity {
                                     .load(url)
                                     .into(circleImageView);
                         }
+                    }
+                    // Update badge based on activeMinutes
+                    double activeMinutes = viewingUser.getActiveMinutes();
+                    if (activeMinutes >= 10000) {
+                        badgeDisplay.setText("Badge: Mastery");
+                    } else if (activeMinutes >= 1000) {
+                        badgeDisplay.setText("Badge: Intermediate");
+                    } else if (activeMinutes >= 200) {
+                        badgeDisplay.setText("Badge: Beginner");
+                    } else {
+                        badgeDisplay.setText("Badge: No Badge yet!"); // No badge earned yet
                     }
                 }
 

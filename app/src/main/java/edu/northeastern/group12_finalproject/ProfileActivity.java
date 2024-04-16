@@ -231,7 +231,9 @@ public class ProfileActivity extends AppCompatActivity {
         displayNameTv = findViewById(R.id.display_name);
         followedCount = findViewById(R.id.tvFollowerNum);
         followingCount = findViewById(R.id.tvFollowingNum);
-        // badge view
+        // badge display
+        TextView badgeDisplay = findViewById(R.id.badge);
+
 
         Query userQuery = usersDatabaseReference.orderByChild("email").equalTo(user.getEmail());
 
@@ -262,6 +264,18 @@ public class ProfileActivity extends AppCompatActivity {
                                     .into(circleImageView);
                         }
                     }
+                    // Update badge based on activeMinutes
+                    double activeMinutes = currUser.getActiveMinutes();
+                    if (activeMinutes >= 10000) {
+                        badgeDisplay.setText("Badge: Mastery");
+                    } else if (activeMinutes >= 1000) {
+                        badgeDisplay.setText("Badge: Intermediate");
+                    } else if (activeMinutes >= 200) {
+                        badgeDisplay.setText("Badge: Beginner");
+                    } else {
+                        badgeDisplay.setText("Badge: No Badge yet!"); // No badge earned yet
+                    }
+
                 }
             }
 
