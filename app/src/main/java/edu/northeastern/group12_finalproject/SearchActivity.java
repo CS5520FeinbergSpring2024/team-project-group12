@@ -2,6 +2,7 @@ package edu.northeastern.group12_finalproject;
 
 import static android.content.ContentValues.TAG;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -75,6 +76,15 @@ public class SearchActivity extends AppCompatActivity {
                 return false;
             }
         });
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent intent = new Intent(SearchActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
 
     }
 

@@ -4,8 +4,10 @@ import static android.content.ContentValues.TAG;
 
 import static java.security.AccessController.getContext;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
@@ -156,7 +158,15 @@ public class EditProfileActivity extends AppCompatActivity {
             Uri imageUri = Uri.parse(imageUriString);
             profileImage.setImageURI(imageUri);
         }
-
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
 
     }
 
