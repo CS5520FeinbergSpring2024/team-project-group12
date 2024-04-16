@@ -231,6 +231,7 @@ public class ProfileActivity extends AppCompatActivity {
         displayNameTv = findViewById(R.id.display_name);
         followedCount = findViewById(R.id.tvFollowerNum);
         followingCount = findViewById(R.id.tvFollowingNum);
+        // badge view
 
         Query userQuery = usersDatabaseReference.orderByChild("email").equalTo(user.getEmail());
 
