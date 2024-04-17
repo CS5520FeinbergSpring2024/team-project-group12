@@ -48,7 +48,8 @@
                     android:id="@+id/time_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="10 min" />
+                    android:text="10 min"
+                    android:textColor="@color/black"/>
 
             </LinearLayout>
 
@@ -68,19 +69,22 @@
             android:layout_height="wrap_content"
             android:text="Title"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
 
         <TextView
             android:id="@+id/active_minutes_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Active Minutes" />
+            android:text="Active Minutes"
+            android:textColor="@color/black"/>
 
         <TextView
             android:id="@+id/distance_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Distance" />
+            android:text="Distance"
+            android:textColor="@color/black"/>
 
         <TextView
             android:id="@+id/descript"
@@ -136,7 +140,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Add a comment"
-                        android:inputType="text" />
+                        android:inputType="text"
+                        android:textColor="@color/black"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 

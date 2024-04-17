@@ -188,7 +188,9 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="Post" />
+                android:text="Post"
+                android:backgroundTint="@color/Pistachio"
+                android:textColor="@android:color/black"/>
 
         </LinearLayout>
     </ScrollView>
@@ -202,6 +204,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/menu_nav"
-        android:background="@color/Pistachio" />
+        android:background="@color/Pistachio"
+        app:itemIconTint="@color/icon_color"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
