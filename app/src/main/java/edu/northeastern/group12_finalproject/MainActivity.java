@@ -186,32 +186,3 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
-
-// OLD QUERY LOGIC
-
-//    // Query the database for the post with the matching username
-//    Query query = databaseReference.orderByChild("username").equalTo(username);
-//    query.addListenerForSingleValueEvent(new ValueEventListener() {
-//        @Override
-//        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//            if (dataSnapshot.exists()) {
-//            // Post found, populate RecyclerView with the queried post
-//            List<Post> posts = new ArrayList<>();
-//            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//            Post post = snapshot.getValue(Post.class);
-//            posts.add(post);
-//            }
-//            adapter = new PostAdapter(posts);
-//            recyclerView.setAdapter(adapter);
-//            } else {
-//            // No post found for the current user
-//            Toast.makeText(MainActivity.this, "No post found for the current user", Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//
-//    @Override
-//    public void onCancelled(@NonNull DatabaseError databaseError) {
-//        // Handle database error
-//        Log.e("MainActivity", "Database error: " + databaseError.getMessage());
-//        }
-//        });
