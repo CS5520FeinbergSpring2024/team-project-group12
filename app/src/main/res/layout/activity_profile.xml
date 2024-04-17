@@ -67,6 +67,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/menu_nav"
-        android:background="@color/Pistachio" />
+        android:background="@color/Pistachio"
+        app:itemIconTint="@color/icon_color"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

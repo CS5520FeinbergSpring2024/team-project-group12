@@ -149,7 +149,9 @@
                     android:id="@+id/addCommentButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add" />
+                    android:text="Add"
+                    android:backgroundTint="@color/Pistachio"
+                    android:textColor="@android:color/black"/>
 
             </LinearLayout>
 
