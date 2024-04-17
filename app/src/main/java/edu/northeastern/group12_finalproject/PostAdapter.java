@@ -123,7 +123,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                             likesRef.setValue(true); // Set this user's like to true
                         }
 
-                        // After updating Firebase, update UI locally (might be better to use Firebase event listeners to listen to changes)
+                        // After updating Firebase, update UI
                         updateLikesDisplay(post.getPostId(), holder.likesTextView);
                     }
 
