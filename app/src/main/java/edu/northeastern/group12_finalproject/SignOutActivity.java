@@ -29,6 +29,7 @@ public class SignOutActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.signOutProgressBar);
         tvSigningOut = findViewById(R.id.tvSigningOut);
         Button btnConfirmSignOut = findViewById(R.id.btnConfirmSignOut);
+        Button btnExit = findViewById(R.id.btnExit);
 
         progressBar.setVisibility(View.GONE);
         tvSigningOut.setVisibility(View.GONE);
@@ -44,6 +45,22 @@ public class SignOutActivity extends AppCompatActivity {
 
                 firebaseAuth.signOut();
                 finish();
+            }
+        });
+
+        btnExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getIntent().hasExtra("Home page")) {
+                    Intent homeIntent = new Intent(SignOutActivity.this, MainActivity.class);
+                    startActivity(homeIntent);
+                    finish();
+                }
+                else {
+                    Intent profileIntent = new Intent(SignOutActivity.this, ProfileActivity.class);
+                    startActivity(profileIntent);
+                    finish();
+                }
             }
         });
     }

@@ -27,6 +27,17 @@
             android:layout_marginTop="20dp"
             android:layout_below="@+id/tvConfirmSignOut"/>
 
+        <Button
+            android:id="@+id/btnExit"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_centerHorizontal="true"
+            android:backgroundTint="@color/Pistachio"
+            android:textSize="20sp"
+            android:layout_marginTop="20dp"
+            android:layout_below="@+id/btnConfirmSignOut"/>
+
     </RelativeLayout>
     <ProgressBar
         android:layout_width="200dp"

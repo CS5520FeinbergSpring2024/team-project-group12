@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private PostAdapter adapter;
     ImageButton searchBtn;
+    ImageView signout;
     List<String> feedIds;
 
     @Override
@@ -98,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e("MainActivity", "Database error: " + error.getMessage());
+            }
+        });
+
+        signout = findViewById(R.id.profileMenu);
+        signout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, SignOutActivity.class);
+                intent.putExtra("Home page", "Home Page");
+                startActivity(intent);
             }
         });
 
