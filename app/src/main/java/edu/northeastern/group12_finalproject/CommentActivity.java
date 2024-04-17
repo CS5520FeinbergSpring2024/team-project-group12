@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
@@ -33,6 +35,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class CommentActivity extends AppCompatActivity {
 
@@ -45,7 +49,8 @@ public class CommentActivity extends AppCompatActivity {
     ImageView postImage;
     TextView timestamp;
     EditText newCommentEditText;
-    private Post post;
+    CircleImageView profilePhoto;
+    ImageButton moreButton;
     private List<Comment> comments = new ArrayList<>();
     private CommentAdapter commentAdapter;
 
@@ -62,9 +67,12 @@ public class CommentActivity extends AppCompatActivity {
         postImage = findViewById(R.id.image_view);
         timestamp = findViewById(R.id.time_text_view);
         newCommentEditText = findViewById(R.id.commentInputEditText);
+        // Adding pictureTV to show profile photo
+        profilePhoto = findViewById(R.id.picturetv);
+        moreButton = findViewById(R.id.morebtn);
+        moreButton.setVisibility(View.GONE);
 
 
-        // Retrieve data from Intent
         // Retrieve data from Intent
         Intent intent = getIntent();
         String postId = intent.getStringExtra("postId");
@@ -93,6 +101,8 @@ public class CommentActivity extends AppCompatActivity {
         activeMinutesTextView.setText("Active Minutes: " + String.valueOf(activeMinutes));
         distanceTextView.setText("Distance: " + String.valueOf(distance));
         timestamp.setText(getTimestampDifference(postTimestamp)); // Implement getTimestampDifference method
+        // Load profile photo to posts.
+        retrievePostAndProfilePhoto(postId);
 
         // Load image using Picasso or any other image loading library
         Picasso.get()
@@ -219,6 +229,57 @@ public class CommentActivity extends AppCompatActivity {
         // Start MainActivity again
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    private void retrievePostAndProfilePhoto(String postId) {
+        DatabaseReference postRef = FirebaseDatabase.getInstance().getReference("posts").child(postId);
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Post post = dataSnapshot.getValue(Post.class);
+                    if (post != null) {
+                        String userId = post.getUserID();
+                        // Now retrieve and set the profile photo using the user ID
+                        retrieveProfilePhoto(userId, profilePhoto);
+                    }
+                } else {
+                    Log.d(TAG, "Post with the given postId does not exist");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "Failed to retrieve post", databaseError.toException());
+            }
+        });
+    }
+
+    private void retrieveProfilePhoto(String uid, CircleImageView photo) {
+
+        Query q = FirebaseDatabase.getInstance().getReference().child("Users").orderByChild("uid").equalTo(uid);
+
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot ds: snapshot.getChildren()) {
+                    Users currUser = ds.getValue(Users.class);
+                    String url = currUser.getProfileImageUrl();
+                    if ((url != null)) {
+                        if (!(url.equals("0"))) {
+                            Picasso.get()
+                                    .load(url)
+                                    .into(photo);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
 }
