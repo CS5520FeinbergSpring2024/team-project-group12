@@ -14,7 +14,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
-            android:textColor="@color/black"
             android:text="Do you want to sign out?"/>
 
         <Button
@@ -43,7 +42,6 @@
         android:layout_alignBottom="@+id/signOutProgressBar"
         android:layout_alignRight="@+id/signOutProgressBar"
         android:layout_alignLeft="@+id/signOutProgressBar"
-        android:textColor="@color/black"
         android:id="@+id/tvSigningOut"/>
 
 </RelativeLayout>
