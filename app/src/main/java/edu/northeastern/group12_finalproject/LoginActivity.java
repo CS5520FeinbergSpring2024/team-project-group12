@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -53,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
                                     public void onSuccess(AuthResult authResult) {
                                         // Display when login is successful.
                                         Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+
                                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                         finish();
                                     }

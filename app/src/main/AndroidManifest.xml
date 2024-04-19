@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission
-        android:name="android.permission.CAMERA"
-        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -18,10 +21,31 @@
         android:theme="@style/Theme.Group12_FinalProject"
         tools:targetApi="31">
         <activity
-            android:name=".CreatePostActivity"
+            android:name=".CommentActivity"
             android:exported="false" />
         <activity
-            android:name=".ImageUploadActivity"
+            android:name=".FollowerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FollowingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignOutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CreatePostActivity"
             android:exported="false" />
         <activity
             android:name=".HomePageActivity"
@@ -29,12 +53,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-
-
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
-
         <activity
             android:name=".SignUpActivity"
             android:exported="true">
@@ -43,8 +64,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-
         </activity>
     </application>
 
