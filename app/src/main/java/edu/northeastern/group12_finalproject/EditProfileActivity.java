@@ -97,17 +97,16 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 int exitCode = retrieveFirebaseInfo();
-                if (exitCode == 0) {
+                if (exitCode >= 0) {
                     Intent intent = new Intent(EditProfileActivity.this, ProfileActivity.class);
-                    intent.putExtra("imageUri", imageUri.toString());
+
+                    if (exitCode == 2) {
+                        intent.putExtra("imageUri", imageUri.toString());
+                    }
                     startActivity(intent);
                     finish();
                 }
-                else if (exitCode == 1) {
-                    Snackbar snackbar = Snackbar.make(v, "Please fill up at least one field before confirming", Snackbar.LENGTH_LONG);
-                    snackbar.show();
-                }
-                else if (exitCode == 2) {
+                else {
                     Snackbar snackbar2 = Snackbar.make(v, "New password should be at least 6 characters", Snackbar.LENGTH_LONG);
                     snackbar2.show();
                 }
@@ -339,27 +338,29 @@ public class EditProfileActivity extends AppCompatActivity {
 
     // Retrieve user info from firebase.
     private int retrieveFirebaseInfo() {
+        int exitCode = 0;
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("Users");
 
+        // If url is set, change exitCode to 2.
         if (!(uploadedUrl.equals(""))) {
             saveImageUrlToDatabase(uploadedUrl);
-            return 0;
+            exitCode = 2;
         }
 
         Log.d(TAG, "Inside retrieve FirebaseInfo");
 
-        // Initial View set up.
-//        if ((nameET.getText().toString().trim().isEmpty())
-//                && (newPassword.getText().toString().trim().isEmpty()) && imageUri!=null) {
-//            return 1;
+//        // Name cannot be empty.
+//        if (nameET.getText().toString().trim().isEmpty()) {
+//            return -1;
 //        }
 
-        if (!((newPassword.getText().toString().trim().isEmpty())) && (newPassword.getText().toString().length() < 6)) {
+        // Exit code change to -2 = password less than 6.
+        if ((!(newPassword.getText().toString().trim().isEmpty())) && (newPassword.getText().toString().length() < 6)) {
 //            Toast.makeText(EditProfileActivity.this, "New password should be at least 6 characters", Toast.LENGTH_LONG);
-            return 2;
+            return -2;
         }
 
         Query userQuery = databaseReference.orderByChild("email").equalTo(user.getEmail());
@@ -388,7 +389,8 @@ public class EditProfileActivity extends AppCompatActivity {
 
             }
         });
-        return 0;
+        // If 2 is returned, profile is set. If 0 is returned, username is set.
+        return exitCode;
     }
 
     private void retrieveProfilePhoto() {
