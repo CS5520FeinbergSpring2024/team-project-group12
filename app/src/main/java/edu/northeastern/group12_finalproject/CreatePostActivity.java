@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
@@ -58,6 +59,8 @@ public class CreatePostActivity extends AppCompatActivity {
     private EditText editTextDescription;
 
     // initialize layout components
+    ImageButton searchBtn;
+    ImageView signout;
     private Button buttonAddImage;
     private Button buttonUploadPhoto;
     private Button post;
@@ -96,6 +99,26 @@ public class CreatePostActivity extends AppCompatActivity {
 
         // initialize Firebase app
         FirebaseApp.initializeApp(this);
+        // Add search function and button listener.
+        searchBtn = findViewById(R.id.search_button);
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CreatePostActivity.this, SearchActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        signout = findViewById(R.id.profileMenu);
+        signout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CreatePostActivity.this, SignOutActivity.class);
+                intent.putExtra("Home page", "Home Page");
+                startActivity(intent);
+            }
+        });
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.bottom_nav_new_post);
