@@ -63,7 +63,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.usernameTextView.setText(post.getUsername());
         int activeMinutes = post.getActiveMinutes();
         holder.activeMinutesTextView.setText("Active Minutes: " + String.valueOf(activeMinutes));
-        holder.distanceTextView.setText("Total Distance: " + String.valueOf(post.getDistance()));
+        holder.distanceTextView.setText("Total Distance: " + String.valueOf(post.getDistance()) + " miles" );
         holder.timestamp.setText(post.getTimestampDifference());
 
         // Set the initial like count
